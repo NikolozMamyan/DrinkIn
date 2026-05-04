@@ -10,6 +10,7 @@ use App\Service\DemoCatalogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class CartApiTest extends WebTestCase
 {
@@ -42,9 +43,11 @@ final class CartApiTest extends WebTestCase
 
         $container->get(DemoCatalogService::class)->seedIfEmpty();
 
+        /** @var UserPasswordHasherInterface $passwordHasher */
+        $passwordHasher = $container->get(UserPasswordHasherInterface::class);
         $user = (new User())
             ->setEmail('cart@test.local')
-            ->setPassword('not-used')
+            ->setPassword($passwordHasher->hashPassword(new User(), 'Sup3rSecret!42'))
             ->setFirstName('Cart')
             ->setLastName('Tester')
             ->setRoles(['ROLE_USER']);
@@ -52,7 +55,13 @@ final class CartApiTest extends WebTestCase
         $entityManager->persist($user);
         $entityManager->flush();
 
-        $client->loginUser($user);
+        $client->request('POST', '/api/login', server: ['CONTENT_TYPE' => 'application/json'], content: json_encode([
+            'email' => 'cart@test.local',
+            'password' => 'Sup3rSecret!42',
+            'remember' => true,
+        ], JSON_THROW_ON_ERROR));
+        self::assertResponseIsSuccessful();
+
         $client->request('POST', '/api/cart/items', server: ['CONTENT_TYPE' => 'application/json'], content: json_encode([
             'productId' => 1,
             'quantity' => 2,
@@ -86,5 +95,13 @@ final class CartApiTest extends WebTestCase
         self::assertTrue($payload['isEmpty']);
         self::assertSame(0, $payload['count']);
         self::assertSame('0,00EUR', $payload['total']);
+    }
+
+    public function testCartRejectsInvalidJsonPayload(): void
+    {
+        $client = static::createClient();
+        $client->request('POST', '/api/cart/items', server: ['CONTENT_TYPE' => 'application/json'], content: '{invalid');
+
+        self::assertResponseStatusCodeSame(400);
     }
 }

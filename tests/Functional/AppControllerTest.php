@@ -30,7 +30,7 @@ final class AppControllerTest extends WebTestCase
     {
         $client = static::createClient();
 
-        foreach (['/profil', '/commandes', '/paiement'] as $path) {
+        foreach (['/profil', '/commandes'] as $path) {
             $client->request('GET', $path);
             self::assertResponseRedirects('/connexion');
         }

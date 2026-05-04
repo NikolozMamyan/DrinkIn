@@ -43,8 +43,32 @@ class Order
     #[ORM\Column(nullable: true)]
     private ?int $rating = null;
 
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $guestEmail = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $guestFirstName = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $guestLastName = null;
+
+    #[ORM\Column(length: 30, nullable: true)]
+    private ?string $guestPhone = null;
+
+    #[ORM\Column(length: 160, nullable: true)]
+    private ?string $guestStreet = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $guestPostalCode = null;
+
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $guestCity = null;
+
+    #[ORM\Column(length: 2, nullable: true)]
+    private ?string $guestCountryCode = null;
+
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'orders')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?User $user = null;
 
     /**
@@ -156,6 +180,102 @@ class Order
     public function setRating(?int $rating): self
     {
         $this->rating = $rating;
+
+        return $this;
+    }
+
+    public function getGuestEmail(): ?string
+    {
+        return $this->guestEmail;
+    }
+
+    public function setGuestEmail(?string $guestEmail): self
+    {
+        $this->guestEmail = $guestEmail;
+
+        return $this;
+    }
+
+    public function getGuestFirstName(): ?string
+    {
+        return $this->guestFirstName;
+    }
+
+    public function setGuestFirstName(?string $guestFirstName): self
+    {
+        $this->guestFirstName = $guestFirstName;
+
+        return $this;
+    }
+
+    public function getGuestLastName(): ?string
+    {
+        return $this->guestLastName;
+    }
+
+    public function setGuestLastName(?string $guestLastName): self
+    {
+        $this->guestLastName = $guestLastName;
+
+        return $this;
+    }
+
+    public function getGuestPhone(): ?string
+    {
+        return $this->guestPhone;
+    }
+
+    public function setGuestPhone(?string $guestPhone): self
+    {
+        $this->guestPhone = $guestPhone;
+
+        return $this;
+    }
+
+    public function getGuestStreet(): ?string
+    {
+        return $this->guestStreet;
+    }
+
+    public function setGuestStreet(?string $guestStreet): self
+    {
+        $this->guestStreet = $guestStreet;
+
+        return $this;
+    }
+
+    public function getGuestPostalCode(): ?string
+    {
+        return $this->guestPostalCode;
+    }
+
+    public function setGuestPostalCode(?string $guestPostalCode): self
+    {
+        $this->guestPostalCode = $guestPostalCode;
+
+        return $this;
+    }
+
+    public function getGuestCity(): ?string
+    {
+        return $this->guestCity;
+    }
+
+    public function setGuestCity(?string $guestCity): self
+    {
+        $this->guestCity = $guestCity;
+
+        return $this;
+    }
+
+    public function getGuestCountryCode(): ?string
+    {
+        return $this->guestCountryCode;
+    }
+
+    public function setGuestCountryCode(?string $guestCountryCode): self
+    {
+        $this->guestCountryCode = $guestCountryCode;
 
         return $this;
     }

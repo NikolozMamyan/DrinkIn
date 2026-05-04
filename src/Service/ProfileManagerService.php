@@ -7,8 +7,11 @@ namespace App\Service;
 use App\Entity\Address;
 use App\Entity\User;
 use App\Repository\AddressRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -19,6 +22,7 @@ final class ProfileManagerService
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly AddressRepository $addressRepository,
+        private readonly UserRepository $userRepository,
         private readonly ValidatorInterface $validator,
     ) {
     }
@@ -55,10 +59,18 @@ final class ProfileManagerService
             allowExtraFields: false,
         ));
 
+        $email = mb_strtolower(trim((string) $payload['email']));
+        $existingUser = $this->userRepository->findOneBy(['email' => $email]);
+        if ($existingUser instanceof User && $existingUser->getId() !== $user->getId()) {
+            throw new ValidationFailedException($payload, new ConstraintViolationList([
+                new ConstraintViolation('Cette adresse email est deja utilisee.', null, [], $payload, 'email', $email),
+            ]));
+        }
+
         $user
             ->setFirstName(trim((string) $payload['firstName']))
             ->setLastName(trim((string) $payload['lastName']))
-            ->setEmail(trim((string) $payload['email']))
+            ->setEmail($email)
             ->setPhone($this->normalizeOptionalString($payload['phone'] ?? null));
 
         $this->entityManager->flush();

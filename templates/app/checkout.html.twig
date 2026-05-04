@@ -13,7 +13,12 @@
 {% endblock %}
 
 {% block app_body %}
-    <div data-controller="checkout" data-checkout-checkout-url-value="{{ path('api_orders_checkout') }}">
+    <div
+        data-controller="checkout"
+        data-checkout-checkout-url-value="{{ path('api_orders_checkout') }}"
+        data-checkout-guest-account-url-value="{{ path('api_orders_guest_account') }}"
+        data-checkout-authenticated-value="{{ is_authenticated ? 'true' : 'false' }}"
+    >
         <main class="page" data-checkout-target="main">
             <div class="steps">
                 <div class="step done"><div class="step-dot"><i class="fa-solid fa-check"></i></div><div class="step-label">Panier</div></div>
@@ -22,6 +27,26 @@
             </div>
 
             <div class="utility-stack">
+                {% if not is_authenticated %}
+                    <section class="checkout-panel">
+                        <div class="section-header"><h2>Commander en invite</h2></div>
+                        <div class="form-stack">
+                            <div class="input-row">
+                                <input class="form-input" type="text" placeholder="Prenom" data-checkout-target="guestFirstName">
+                                <input class="form-input" type="text" placeholder="Nom" data-checkout-target="guestLastName">
+                            </div>
+                            <input class="form-input" type="email" placeholder="Email" data-checkout-target="guestEmail">
+                            <input class="form-input" type="text" placeholder="Telephone (optionnel)" data-checkout-target="guestPhone">
+                            <input class="form-input" type="text" placeholder="Adresse" data-checkout-target="guestStreet">
+                            <div class="input-row">
+                                <input class="form-input" type="text" placeholder="Code postal" data-checkout-target="guestPostalCode">
+                                <input class="form-input" type="text" placeholder="Ville" data-checkout-target="guestCity">
+                            </div>
+                            <input class="form-input" type="text" placeholder="Pays" value="FR" data-checkout-target="guestCountryCode">
+                        </div>
+                    </section>
+                {% endif %}
+
                 <section class="checkout-panel">
                     <div class="section-header"><h2>Adresse de livraison</h2></div>
                     {% for address in profile.addresses %}
@@ -114,7 +139,18 @@
                     <div class="divider"></div>
                     <div class="summary-row"><span>Total paye</span><span>{{ (cart.total / 100)|number_format(2, ',', ' ') }}EUR</span></div>
                 </div>
-                <a href="{{ path('app_orders') }}" class="btn btn-primary btn-full">Suivre ma commande</a>
+                {% if not is_authenticated %}
+                    <section class="checkout-panel" data-checkout-target="guestAccountPanel" hidden>
+                        <div class="section-header"><h2>Creer votre compte</h2></div>
+                        <p class="small-copy">Ajoutez un mot de passe pour retrouver cette commande et reutiliser vos informations la prochaine fois.</p>
+                        <div class="form-stack">
+                            <input class="form-input" type="password" placeholder="Mot de passe" data-checkout-target="guestPassword">
+                            <button type="button" class="btn btn-primary btn-full" data-action="click->checkout#createGuestAccount">Creer mon compte</button>
+                        </div>
+                    </section>
+                {% else %}
+                    <a href="{{ path('app_orders') }}" class="btn btn-primary btn-full">Suivre ma commande</a>
+                {% endif %}
                 <a href="{{ path('app_home') }}" class="btn btn-outline btn-full">Continuer mes achats</a>
             </div>
         </section>

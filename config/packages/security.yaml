@@ -24,9 +24,10 @@ security:
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/api/me, roles: ROLE_USER }
         - { path: ^/api/logout, roles: ROLE_USER }
+        - { path: ^/api/orders/checkout$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/orders/guest-account$, roles: PUBLIC_ACCESS }
         - { path: ^/api/profile, roles: ROLE_USER }
         - { path: ^/api/orders, roles: ROLE_USER }
-        - { path: ^/paiement, roles: ROLE_USER }
         - { path: ^/commandes, roles: ROLE_USER }
         - { path: ^/profil, roles: ROLE_USER }
 

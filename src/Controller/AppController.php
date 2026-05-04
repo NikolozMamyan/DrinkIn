@@ -66,11 +66,10 @@ final class AppController extends AbstractController
     #[Route('/paiement', name: 'app_checkout', methods: ['GET'])]
     public function checkout(CartService $cartService, DemoProfileService $profileService): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_USER');
-
         return $this->render('app/checkout.html.twig', [
             'cart' => $cartService->getSummary(),
             'profile' => $profileService->build($this->getUser()),
+            'is_authenticated' => null !== $this->getUser(),
             'current_nav' => 'cart',
         ]);
     }

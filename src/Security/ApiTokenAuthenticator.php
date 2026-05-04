@@ -189,10 +189,9 @@ final class ApiTokenAuthenticator extends AbstractAuthenticator implements Authe
     {
         return '/profil' === $path
             || '/commandes' === $path
-            || '/paiement' === $path
             || str_starts_with($path, '/admin')
             || in_array($path, ['/api/me', '/api/logout'], true)
             || str_starts_with($path, '/api/profile')
-            || str_starts_with($path, '/api/orders');
+            || (str_starts_with($path, '/api/orders') && !in_array($path, ['/api/orders/checkout', '/api/orders/guest-account'], true));
     }
 }

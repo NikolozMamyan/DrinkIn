@@ -7,6 +7,7 @@ namespace App\Controller\Api;
 use App\Service\CartService;
 use App\Service\MoneyFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -17,7 +18,7 @@ final class CartController extends AbstractController
     #[Route('/items', name: 'add_item', methods: ['POST'])]
     public function addItem(Request $request, CartService $cartService, MoneyFormatter $moneyFormatter): JsonResponse
     {
-        $payload = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->decodePayload($request);
         $summary = $cartService->addItem((int) ($payload['productId'] ?? 0), (int) ($payload['quantity'] ?? 1));
 
         return $this->json($this->normalizeSummary($summary, $moneyFormatter));
@@ -28,7 +29,7 @@ final class CartController extends AbstractController
     {
         $quantity = 0;
         if ('PATCH' === $request->getMethod()) {
-            $payload = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+            $payload = $this->decodePayload($request);
             $quantity = (int) ($payload['quantity'] ?? 1);
         }
 
@@ -40,7 +41,7 @@ final class CartController extends AbstractController
     #[Route('/delivery', name: 'delivery', methods: ['PATCH'])]
     public function delivery(Request $request, CartService $cartService, MoneyFormatter $moneyFormatter): JsonResponse
     {
-        $payload = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->decodePayload($request);
         $summary = $cartService->updateDelivery((string) ($payload['mode'] ?? 'express'));
 
         return $this->json($this->normalizeSummary($summary, $moneyFormatter));
@@ -49,7 +50,7 @@ final class CartController extends AbstractController
     #[Route('/promo', name: 'promo', methods: ['POST'])]
     public function promo(Request $request, CartService $cartService, MoneyFormatter $moneyFormatter): JsonResponse
     {
-        $payload = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->decodePayload($request);
         $summary = $cartService->applyPromo((string) ($payload['code'] ?? ''));
 
         return $this->json($this->normalizeSummary($summary, $moneyFormatter) + [
@@ -68,7 +69,7 @@ final class CartController extends AbstractController
     #[Route('/note', name: 'note', methods: ['PATCH'])]
     public function note(Request $request, CartService $cartService, MoneyFormatter $moneyFormatter): JsonResponse
     {
-        $payload = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->decodePayload($request);
         $summary = $cartService->updateNote((string) ($payload['note'] ?? ''));
 
         return $this->json($this->normalizeSummary($summary, $moneyFormatter));
@@ -105,5 +106,19 @@ final class CartController extends AbstractController
                 'lineTotalCents' => $item['lineTotal'],
             ], $summary['items']),
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function decodePayload(Request $request): array
+    {
+        try {
+            $payload = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            throw new BadRequestException('Invalid JSON payload.');
+        }
+
+        return is_array($payload) ? $payload : [];
     }
 }

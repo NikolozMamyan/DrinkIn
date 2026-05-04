@@ -1,9 +1,11 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['cardInner', 'numberDisplay', 'nameDisplay', 'expiryDisplay', 'cvvDisplay', 'modal', 'processing', 'otp', 'main', 'success', 'successNumber'];
+    static targets = ['cardInner', 'numberDisplay', 'nameDisplay', 'expiryDisplay', 'cvvDisplay', 'modal', 'processing', 'otp', 'main', 'success', 'successNumber', 'guestFirstName', 'guestLastName', 'guestEmail', 'guestPhone', 'guestStreet', 'guestPostalCode', 'guestCity', 'guestCountryCode', 'guestPassword', 'guestAccountPanel'];
     static values = {
         checkoutUrl: String,
+        guestAccountUrl: String,
+        authenticated: Boolean,
     };
 
     formatNumber(event) {
@@ -50,10 +52,26 @@ export default class extends Controller {
     }
 
     async confirm() {
-        const response = await fetch(this.checkoutUrlValue, {
+        const requestInit = {
             method: 'POST',
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        });
+        };
+
+        if (!this.authenticatedValue) {
+            requestInit.headers['Content-Type'] = 'application/json';
+            requestInit.body = JSON.stringify({
+                firstName: this.guestFirstNameTarget.value,
+                lastName: this.guestLastNameTarget.value,
+                email: this.guestEmailTarget.value,
+                phone: this.guestPhoneTarget.value,
+                street: this.guestStreetTarget.value,
+                postalCode: this.guestPostalCodeTarget.value,
+                city: this.guestCityTarget.value,
+                countryCode: this.guestCountryCodeTarget.value || 'FR',
+            });
+        }
+
+        const response = await fetch(this.checkoutUrlValue, requestInit);
         const payload = await response.json();
 
         if (!response.ok || !payload.ok) {
@@ -66,9 +84,34 @@ export default class extends Controller {
         document.body.classList.remove('has-overlay');
         this.mainTarget.hidden = true;
         this.successTarget.hidden = false;
+        if (!this.authenticatedValue && payload.guestCheckout && this.hasGuestAccountPanelTarget) {
+            this.guestAccountPanelTarget.hidden = false;
+        }
         document.querySelectorAll('.badge').forEach((badge) => {
             badge.textContent = '0';
             badge.hidden = true;
         });
+    }
+
+    async createGuestAccount() {
+        const response = await fetch(this.guestAccountUrlValue, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({
+                orderNumber: this.successNumberTarget.textContent.trim(),
+                password: this.guestPasswordTarget.value,
+            }),
+        });
+        const payload = await response.json();
+
+        if (!response.ok || !payload.ok) {
+            this.dispatch('toast', { detail: { message: payload.message || 'Impossible de creer le compte' }, prefix: 'app' });
+            return;
+        }
+
+        window.location.assign(payload.redirectUrl || '/commandes');
     }
 }
