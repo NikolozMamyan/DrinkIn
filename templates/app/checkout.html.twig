@@ -18,6 +18,8 @@
         data-checkout-checkout-url-value="{{ path('api_orders_checkout') }}"
         data-checkout-guest-account-url-value="{{ path('api_orders_guest_account') }}"
         data-checkout-authenticated-value="{{ is_authenticated ? 'true' : 'false' }}"
+        data-checkout-delivery-mode-value="{{ cart.delivery }}"
+        data-checkout-has-saved-address-value="{{ profile.addresses|length > 0 ? 'true' : 'false' }}"
     >
         <main class="page" data-checkout-target="main">
             <div class="steps">
@@ -37,28 +39,54 @@
                             </div>
                             <input class="form-input" type="email" placeholder="Email" data-checkout-target="guestEmail">
                             <input class="form-input" type="text" placeholder="Telephone (optionnel)" data-checkout-target="guestPhone">
-                            <input class="form-input" type="text" placeholder="Adresse" data-checkout-target="guestStreet">
-                            <div class="input-row">
-                                <input class="form-input" type="text" placeholder="Code postal" data-checkout-target="guestPostalCode">
-                                <input class="form-input" type="text" placeholder="Ville" data-checkout-target="guestCity">
-                            </div>
-                            <input class="form-input" type="text" placeholder="Pays" value="FR" data-checkout-target="guestCountryCode">
+                            {% if cart.delivery != 'pickup' %}
+                                <input class="form-input" type="text" placeholder="Adresse" data-checkout-target="guestStreet">
+                                <div class="input-row">
+                                    <input class="form-input" type="text" placeholder="Code postal" data-checkout-target="guestPostalCode">
+                                    <input class="form-input" type="text" placeholder="Ville" data-checkout-target="guestCity">
+                                </div>
+                                <input class="form-input" type="text" placeholder="Pays" value="FR" data-checkout-target="guestCountryCode">
+                            {% else %}
+                                <div class="pickup-inline-note">
+                                    <i class="fa-solid fa-store"></i>
+                                    <span>Aucune adresse de livraison necessaire pour un retrait en magasin.</span>
+                                </div>
+                            {% endif %}
                         </div>
                     </section>
                 {% endif %}
 
                 <section class="checkout-panel">
                     <div class="section-header"><h2>Adresse de livraison</h2></div>
-                    {% for address in profile.addresses %}
-                        {% include 'partials/_address_card.html.twig' with { address: address } %}
-                    {% endfor %}
-                    {% if profile.addresses|length == 0 %}
-                        <div class="address-card">
+                    {% if cart.delivery == 'pickup' %}
+                        <div class="address-card address-card-store">
+                            <div class="address-card-store-icon"><i class="fa-solid fa-store"></i></div>
                             <div>
-                                <p class="card-name">Aucune adresse enregistree</p>
-                                <p class="card-sub">Ajoutez une adresse dans le profil pour finaliser votre compte.</p>
+                                <p class="card-name">{{ store_address.label }}</p>
+                                <p class="card-sub">{{ store_address.address }}</p>
+                                <p class="small-copy">{{ store_address.hours }}</p>
                             </div>
                         </div>
+                    {% else %}
+                        {% for address in profile.addresses %}
+                            {% include 'partials/_address_card.html.twig' with { address: address } %}
+                        {% endfor %}
+                        {% if is_authenticated and profile.addresses|length == 0 %}
+                            <a href="{{ path('app_profile') }}" class="address-plus-card">
+                                <span class="address-plus-symbol">+</span>
+                                <span class="address-plus-copy">
+                                    <strong>Ajouter une adresse</strong>
+                                    <span>Impossible de confirmer la commande sans adresse de livraison.</span>
+                                </span>
+                            </a>
+                        {% elseif profile.addresses|length == 0 %}
+                            <div class="address-card address-card-warning">
+                                <div>
+                                    <p class="card-name">Adresse requise</p>
+                                    <p class="card-sub">Renseignez votre adresse dans le formulaire invite pour continuer.</p>
+                                </div>
+                            </div>
+                        {% endif %}
                     {% endif %}
                 </section>
 
@@ -105,7 +133,7 @@
                     <div class="summary-row total"><span>Total</span><span>{{ (cart.total / 100)|number_format(2, ',', ' ') }}EUR</span></div>
                 </section>
 
-                <button type="button" class="btn btn-primary btn-full checkout-pay-button" data-action="click->checkout#openModal">
+                <button type="button" class="btn btn-primary btn-full checkout-pay-button" data-checkout-target="payButton" data-action="click->checkout#openModal">
                     <i class="fa-solid fa-lock"></i> Payer {{ (cart.total / 100)|number_format(2, ',', ' ') }}EUR
                 </button>
             </div>

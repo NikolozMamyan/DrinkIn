@@ -37,7 +37,10 @@
                     <h2>{{ heroProduct.name }}<br>{{ heroProduct.badge }}</h2>
                     <span class="btn btn-primary">Voir l'offre</span>
                 </div>
-                <i class="fa-solid fa-{{ heroProduct.icon }}"></i>
+                <div class="hero-product-visual">
+                    <img src="{{ asset(heroProduct.image) }}" alt="{{ heroProduct.name }}" class="product-media product-media-hero">
+                    <span class="product-icon-badge"><i class="fa-solid fa-{{ heroProduct.icon }}"></i></span>
+                </div>
             </a>
 
             <section>
@@ -62,8 +65,9 @@
                             <article class="featured-card">
                                 <a href="{{ path('app_product_show', { slug: product.slug }) }}" class="featured-card-link">
                                     <div class="f-img">
-                                        <i class="fa-solid fa-{{ product.icon }}"></i>
+                                        <img src="{{ asset(product.image) }}" alt="{{ product.name }}" class="product-media product-media-featured">
                                         {% if product.badge %}<span class="tag">{{ product.badge }}</span>{% endif %}
+                                        <span class="product-icon-badge"><i class="fa-solid fa-{{ product.icon }}"></i></span>
                                     </div>
                                     <div class="f-body">
                                         <p class="card-name">{{ product.name }}</p>

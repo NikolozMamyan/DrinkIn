@@ -1,11 +1,13 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['cardInner', 'numberDisplay', 'nameDisplay', 'expiryDisplay', 'cvvDisplay', 'modal', 'processing', 'otp', 'main', 'success', 'successNumber', 'guestFirstName', 'guestLastName', 'guestEmail', 'guestPhone', 'guestStreet', 'guestPostalCode', 'guestCity', 'guestCountryCode', 'guestPassword', 'guestAccountPanel'];
+    static targets = ['cardInner', 'numberDisplay', 'nameDisplay', 'expiryDisplay', 'cvvDisplay', 'modal', 'processing', 'otp', 'main', 'success', 'successNumber', 'guestFirstName', 'guestLastName', 'guestEmail', 'guestPhone', 'guestStreet', 'guestPostalCode', 'guestCity', 'guestCountryCode', 'guestPassword', 'guestAccountPanel', 'payButton'];
     static values = {
         checkoutUrl: String,
         guestAccountUrl: String,
         authenticated: Boolean,
+        deliveryMode: String,
+        hasSavedAddress: Boolean,
     };
 
     formatNumber(event) {
@@ -40,6 +42,10 @@ export default class extends Controller {
     }
 
     openModal() {
+        if (!this.canCheckout()) {
+            return;
+        }
+
         this.modalTarget.classList.add('is-open');
         document.body.classList.add('has-overlay');
         this.processingTarget.hidden = false;
@@ -64,10 +70,10 @@ export default class extends Controller {
                 lastName: this.guestLastNameTarget.value,
                 email: this.guestEmailTarget.value,
                 phone: this.guestPhoneTarget.value,
-                street: this.guestStreetTarget.value,
-                postalCode: this.guestPostalCodeTarget.value,
-                city: this.guestCityTarget.value,
-                countryCode: this.guestCountryCodeTarget.value || 'FR',
+                street: this.hasGuestStreetTarget ? this.guestStreetTarget.value : '',
+                postalCode: this.hasGuestPostalCodeTarget ? this.guestPostalCodeTarget.value : '',
+                city: this.hasGuestCityTarget ? this.guestCityTarget.value : '',
+                countryCode: this.hasGuestCountryCodeTarget ? (this.guestCountryCodeTarget.value || 'FR') : 'FR',
             });
         }
 
@@ -113,5 +119,59 @@ export default class extends Controller {
         }
 
         window.location.assign(payload.redirectUrl || '/commandes');
+    }
+
+    canCheckout() {
+        if (this.requiresAddress() && this.authenticatedValue && !this.hasSavedAddressValue) {
+            this.dispatch('toast', { detail: { message: 'Ajoutez une adresse de livraison avant de payer.' }, prefix: 'app' });
+            return false;
+        }
+
+        if (!this.authenticatedValue && !this.validateGuestForm()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    requiresAddress() {
+        return this.deliveryModeValue !== 'pickup';
+    }
+
+    validateGuestForm() {
+        const requiredFields = [
+            this.guestFirstNameTarget,
+            this.guestLastNameTarget,
+            this.guestEmailTarget,
+        ];
+
+        if (this.requiresAddress()) {
+            if (this.hasGuestStreetTarget) {
+                requiredFields.push(this.guestStreetTarget);
+            }
+            if (this.hasGuestPostalCodeTarget) {
+                requiredFields.push(this.guestPostalCodeTarget);
+            }
+            if (this.hasGuestCityTarget) {
+                requiredFields.push(this.guestCityTarget);
+            }
+        }
+
+        const invalidField = requiredFields.find((field) => !field.value.trim());
+        if (invalidField) {
+            invalidField.focus();
+            this.dispatch('toast', {
+                detail: {
+                    message: this.requiresAddress()
+                        ? 'Renseignez vos informations et votre adresse avant de payer.'
+                        : 'Renseignez vos informations avant de payer.',
+                },
+                prefix: 'app',
+            });
+
+            return false;
+        }
+
+        return true;
     }
 }

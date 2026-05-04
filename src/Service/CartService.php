@@ -69,7 +69,7 @@ final class CartService
         $deliveryFee = 0 === $count
             ? 0
             : match ($state['delivery']) {
-                'standard', 'pickup' => 0,
+                'pickup' => 0,
                 default => 390,
             };
         $discount = self::PROMO_CODE === $state['promo'] ? (int) round($subtotal * 0.10) : 0;
@@ -125,7 +125,7 @@ final class CartService
     public function updateDelivery(string $mode): array
     {
         $state = $this->getState();
-        $state['delivery'] = in_array($mode, ['express', 'standard', 'pickup'], true) ? $mode : 'express';
+        $state['delivery'] = $this->normalizeDeliveryMode($mode);
         $this->saveState($state);
 
         return $this->getSummary();
@@ -214,7 +214,10 @@ final class CartService
 
         $state = $this->requestStack->getSession()->get(self::SESSION_KEY, []);
 
-        return array_replace(self::DEFAULT_STATE, $state);
+        $resolvedState = array_replace(self::DEFAULT_STATE, $state);
+        $resolvedState['delivery'] = $this->normalizeDeliveryMode((string) ($resolvedState['delivery'] ?? 'express'));
+
+        return $resolvedState;
     }
 
     /**
@@ -225,7 +228,7 @@ final class CartService
         $user = $this->getUser();
         if ($user instanceof User) {
             $cart = $this->getOrCreatePersistentCart($user);
-            $cart->setDeliveryMode((string) $state['delivery']);
+            $cart->setDeliveryMode($this->normalizeDeliveryMode((string) $state['delivery']));
             $cart->setPromoCode($state['promo'] ? (string) $state['promo'] : null);
             $cart->setNote((string) $state['note']);
             $cart->setFavorites($state['favorites'] ?? []);
@@ -309,7 +312,7 @@ final class CartService
 
         $merged = [
             'items' => $mergedItems,
-            'delivery' => $sessionState['delivery'] ?? $currentState['delivery'],
+            'delivery' => $this->normalizeDeliveryMode((string) ($sessionState['delivery'] ?? $currentState['delivery'])),
             'promo' => $sessionState['promo'] ?? $currentState['promo'],
             'note' => $sessionState['note'] ?? $currentState['note'],
             'favorites' => array_values(array_unique(array_merge($currentState['favorites'], $sessionState['favorites'] ?? []))),
@@ -334,11 +337,16 @@ final class CartService
 
         return [
             'items' => $items,
-            'delivery' => $cart->getDeliveryMode(),
+            'delivery' => $this->normalizeDeliveryMode($cart->getDeliveryMode()),
             'promo' => $cart->getPromoCode(),
             'note' => $cart->getNote(),
             'favorites' => $cart->getFavorites(),
         ];
+    }
+
+    private function normalizeDeliveryMode(string $mode): string
+    {
+        return 'pickup' === $mode ? 'pickup' : 'express';
     }
 
     /**

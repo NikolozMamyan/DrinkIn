@@ -9,10 +9,11 @@
 >
     <a href="{{ path('app_product_show', { slug: product.slug }) }}" class="product-card-link">
         <div class="img-wrap">
-            <i class="fa-solid fa-{{ product.icon }}"></i>
+            <img src="{{ asset(product.image) }}" alt="{{ product.name }}" class="product-media">
             {% if product.badge %}
                 <span class="tag">{{ product.badge }}</span>
             {% endif %}
+            <span class="product-icon-badge"><i class="fa-solid fa-{{ product.icon }}"></i></span>
         </div>
         <div class="card-body">
             <p class="card-name">{{ product.name }}</p>

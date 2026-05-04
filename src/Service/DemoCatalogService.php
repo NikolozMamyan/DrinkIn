@@ -191,11 +191,27 @@ final class DemoCatalogService
             'featured' => $product->isFeatured(),
             'region' => $product->getRegion(),
             'country' => $product->getCountry(),
+            'image' => $this->productImagePath($product->getSlug(), $product->getCategory()?->getSlug()),
             'volume' => sprintf('%scl', $product->getVolumeCl()),
             'abv' => rtrim(rtrim(number_format($product->getAlcoholVolume(), 1, '.', ''), '0'), '.').'%',
             'description' => $product->getDescription(),
             'tastingProfile' => $product->getTastingProfile(),
         ];
+    }
+
+    private function productImagePath(string $slug, ?string $categorySlug): string
+    {
+        return match ($slug) {
+            'aperol' => 'images/products/aperol.png',
+            'jack-daniels', 'glenfiddich-12' => 'images/products/jack.png',
+            default => match ($categorySlug) {
+                'vin' => 'images/products/vin.png',
+                'biere' => 'images/products/bierre.png',
+                'champagne' => 'images/products/champagne.png',
+                'whisky' => 'images/products/jack.png',
+                default => 'images/products/vin.png',
+            },
+        };
     }
 
     /**

@@ -35,8 +35,14 @@ final class OrderPlacementService
             throw new \RuntimeException('Cannot place an order from an empty cart.');
         }
 
+        $requiresAddress = 'pickup' !== $cart['delivery'];
+
+        if ($user instanceof User && $requiresAddress && 0 === $user->getAddresses()->count()) {
+            throw new \RuntimeException('Ajoutez une adresse avant de confirmer votre commande.');
+        }
+
         if (!$user instanceof User) {
-            $guestData = $this->validateGuestData($guestData);
+            $guestData = $this->validateGuestData($guestData, $requiresAddress);
         }
 
         $order = (new Order())
@@ -145,7 +151,7 @@ final class OrderPlacementService
      * @param array<string, mixed> $guestData
      * @return array{email:string,firstName:string,lastName:string,phone:?string,street:string,postalCode:string,city:string,countryCode:string}
      */
-    private function validateGuestData(array $guestData): array
+    private function validateGuestData(array $guestData, bool $requiresAddress): array
     {
         $normalized = [
             'email' => mb_strtolower(trim((string) ($guestData['email'] ?? ''))),
@@ -164,10 +170,18 @@ final class OrderPlacementService
                 'firstName' => new Assert\Required([new Assert\NotBlank(), new Assert\Length(max: 100)]),
                 'lastName' => new Assert\Required([new Assert\NotBlank(), new Assert\Length(max: 100)]),
                 'phone' => new Assert\Optional([new Assert\Length(max: 30)]),
-                'street' => new Assert\Required([new Assert\NotBlank(), new Assert\Length(max: 160)]),
-                'postalCode' => new Assert\Required([new Assert\NotBlank(), new Assert\Length(max: 20)]),
-                'city' => new Assert\Required([new Assert\NotBlank(), new Assert\Length(max: 120)]),
-                'countryCode' => new Assert\Required([new Assert\NotBlank(), new Assert\Length(min: 2, max: 2)]),
+                'street' => $requiresAddress
+                    ? new Assert\Required([new Assert\NotBlank(), new Assert\Length(max: 160)])
+                    : new Assert\Optional([new Assert\Length(max: 160)]),
+                'postalCode' => $requiresAddress
+                    ? new Assert\Required([new Assert\NotBlank(), new Assert\Length(max: 20)])
+                    : new Assert\Optional([new Assert\Length(max: 20)]),
+                'city' => $requiresAddress
+                    ? new Assert\Required([new Assert\NotBlank(), new Assert\Length(max: 120)])
+                    : new Assert\Optional([new Assert\Length(max: 120)]),
+                'countryCode' => $requiresAddress
+                    ? new Assert\Required([new Assert\NotBlank(), new Assert\Length(min: 2, max: 2)])
+                    : new Assert\Optional([new Assert\Length(min: 2, max: 2)]),
             ],
             allowExtraFields: true,
         ));

@@ -49,15 +49,16 @@
                 <div class="section-header"><h2>Mode de livraison</h2></div>
                 <div class="delivery-options">
                     <button type="button" class="delivery-option {{ cart.delivery == 'express' ? 'is-selected' : '' }}" data-delivery-option data-mode="express" data-action="click->cart#selectDelivery"><i class="fa-solid fa-rocket"></i>Express</button>
-                    <button type="button" class="delivery-option {{ cart.delivery == 'standard' ? 'is-selected' : '' }}" data-delivery-option data-mode="standard" data-action="click->cart#selectDelivery"><i class="fa-solid fa-box"></i>Standard</button>
                     <button type="button" class="delivery-option {{ cart.delivery == 'pickup' ? 'is-selected' : '' }}" data-delivery-option data-mode="pickup" data-action="click->cart#selectDelivery"><i class="fa-solid fa-store"></i>Retrait</button>
                 </div>
             </section>
 
-            <section class="card" data-cart-target="itemsContainer">
-                {% for item in cart.items %}
+                <section class="card" data-cart-target="itemsContainer">
+                    {% for item in cart.items %}
                     <div class="cart-item" data-cart-item>
-                        <div class="cart-thumb"><i class="fa-solid fa-{{ item.icon }}"></i></div>
+                        <div class="cart-thumb">
+                            <img src="{{ asset(item.image) }}" alt="{{ item.name }}" class="product-media product-media-cart">
+                        </div>
                         <div class="cart-info-fill">
                             <p class="card-name">{{ item.name }}</p>
                             <p class="card-sub">{{ item.subtitle }}</p>
@@ -76,20 +77,25 @@
                 <div class="section-header"><h2>Code promo</h2></div>
                 <div class="promo-bar">
                     <i class="fa-solid fa-tags"></i>
-                    <input type="text" placeholder="Entrez votre code..." data-promo-input>
-                    <button type="button" class="btn btn-outline" data-action="click->cart#applyPromo">Appliquer</button>
+                    <input type="text" placeholder="Entrez votre code..." value="{{ cart.promo ?: '' }}" data-cart-target="promoInput">
+                    <button type="button" class="btn btn-outline promo-apply-btn" data-action="click->cart#applyPromo">Appliquer</button>
+                </div>
+                <div class="promo-active-card" data-cart-target="promoCard" {{ cart.promo ? '' : 'hidden' }}>
+                    <div>
+                        <p class="promo-active-label">Code actif</p>
+                        <p class="promo-active-value"><span data-cart-target="promoCode">{{ cart.promo ?: 'BIENVENUE10' }}</span> <span class="promo-active-discount" data-cart-target="discount">-{{ (cart.discount / 100)|number_format(2, ',', ' ') }}EUR</span></p>
+                    </div>
+                    <button type="button" class="promo-remove-btn" data-action="click->cart#removePromo" aria-label="Retirer le code promo">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
                 </div>
             </section>
 
             <section>
                 <div class="section-header"><h2>Recapitulatif</h2></div>
-                <div class="summary-box">
+                <div class="summary-box summary-box-spotlight">
                     <div class="summary-row"><span>Sous-total</span><span data-cart-target="subtotal">{{ (cart.subtotal / 100)|number_format(2, ',', ' ') }}EUR</span></div>
                     <div class="summary-row"><span>Livraison</span><span data-cart-target="deliveryFee">{{ (cart.deliveryFee / 100)|number_format(2, ',', ' ') }}EUR</span></div>
-                    <div class="summary-row" data-cart-target="promoRow" {{ cart.promo ? '' : 'hidden' }}>
-                        <span>Code {{ cart.promo ?: 'BIENVENUE10' }}</span>
-                        <span data-cart-target="discount">{{ (cart.discount / 100)|number_format(2, ',', ' ') }}EUR</span>
-                    </div>
                     <div class="summary-row total"><span>Total</span><span data-cart-target="total">{{ (cart.total / 100)|number_format(2, ',', ' ') }}EUR</span></div>
                 </div>
             </section>

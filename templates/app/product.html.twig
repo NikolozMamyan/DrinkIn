@@ -11,7 +11,8 @@
     >
         <main class="page page-product">
             <div class="product-hero">
-                <i class="fa-solid fa-{{ product.icon }}"></i>
+                <img src="{{ asset(product.image) }}" alt="{{ product.name }}" class="product-media product-media-hero product-media-hero-page">
+                <span class="product-icon-badge product-icon-badge-hero"><i class="fa-solid fa-{{ product.icon }}"></i></span>
                 <div class="product-overlay-actions">
                     <a href="{{ path('app_catalogue') }}" class="round-btn"><i class="fa-solid fa-arrow-left"></i></a>
                     <span class="discount-badge">{{ product.badge ?: 'Selection' }}</span>
@@ -102,7 +103,10 @@
                         <div class="related-row">
                             {% for related in relatedProducts %}
                                 <a href="{{ path('app_product_show', { slug: related.slug }) }}" class="related-card">
-                                    <div class="r-img"><i class="fa-solid fa-{{ related.icon }}"></i></div>
+                                    <div class="r-img">
+                                        <img src="{{ asset(related.image) }}" alt="{{ related.name }}" class="product-media product-media-featured">
+                                        <span class="product-icon-badge"><i class="fa-solid fa-{{ related.icon }}"></i></span>
+                                    </div>
                                     <div class="r-body">
                                         <p class="card-name">{{ related.name }}</p>
                                         <p class="t-price">{{ (related.price / 100)|number_format(2, ',', ' ') }}EUR</p>

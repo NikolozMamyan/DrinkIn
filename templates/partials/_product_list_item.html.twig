@@ -8,7 +8,10 @@
     data-featured="{{ product.featured ? 1 : 0 }}"
 >
     <a href="{{ path('app_product_show', { slug: product.slug }) }}" class="product-list-link">
-        <div class="li-img"><i class="fa-solid fa-{{ product.icon }}"></i></div>
+        <div class="li-img">
+            <img src="{{ asset(product.image) }}" alt="{{ product.name }}" class="product-media product-media-list">
+            <span class="product-icon-badge product-icon-badge-list"><i class="fa-solid fa-{{ product.icon }}"></i></span>
+        </div>
         <div class="li-info">
             <p class="li-name">{{ product.name }}</p>
             <p class="li-sub">{{ product.subtitle }} - {{ product.abv }}</p>

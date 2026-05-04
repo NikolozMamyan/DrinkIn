@@ -6,7 +6,9 @@ export default class extends Controller {
         'deliveryFee',
         'discount',
         'total',
-        'promoRow',
+        'promoCard',
+        'promoCode',
+        'promoInput',
         'checkoutLabel',
         'itemsContainer',
         'emptyState',
@@ -67,19 +69,30 @@ export default class extends Controller {
     }
 
     async applyPromo() {
-        const input = this.element.querySelector('[data-promo-input]');
         const response = await fetch('/api/cart/promo', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-            body: JSON.stringify({ code: input.value }),
+            body: JSON.stringify({ code: this.promoInputTarget.value }),
         });
         const payload = await response.json();
 
         this.renderSummary(payload);
         this.toast(
-            payload.promoApplied ? 'Code promo appliqué !' : 'Code promo invalide.',
+            payload.promoApplied ? 'Code promo applique !' : 'Code promo invalide.',
             payload.promoApplied ? 'success' : 'error'
         );
+    }
+
+    async removePromo() {
+        const response = await fetch('/api/cart/promo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            body: JSON.stringify({ code: '' }),
+        });
+        const payload = await response.json();
+
+        this.renderSummary(payload);
+        this.toast('Code promo retire.');
     }
 
     queueNoteUpdate() {
@@ -124,10 +137,15 @@ export default class extends Controller {
     renderSummary(payload) {
         this.subtotalTarget.textContent = payload.subtotal;
         this.deliveryFeeTarget.textContent = payload.deliveryFee;
-        this.discountTarget.textContent = payload.discount;
+        this.discountTarget.textContent = `-${payload.discount}`;
         this.totalTarget.textContent = payload.total;
         this.checkoutLabelTarget.textContent = `Payer ${payload.total}`;
-        this.promoRowTarget.hidden = !payload.promo;
+        this.promoCardTarget.hidden = !payload.promo;
+        this.promoCodeTarget.textContent = payload.promo || '';
+
+        if (!payload.promo) {
+            this.promoInputTarget.value = '';
+        }
 
         if (this.hasHeaderCountTarget) {
             this.headerCountTarget.textContent = `${payload.count} article${payload.count > 1 ? 's' : ''}`;

@@ -70,6 +70,11 @@ final class AppController extends AbstractController
             'cart' => $cartService->getSummary(),
             'profile' => $profileService->build($this->getUser()),
             'is_authenticated' => null !== $this->getUser(),
+            'store_address' => [
+                'label' => 'DrinkIn Paris Centre',
+                'address' => '12 rue des Fetes, 75002 Paris',
+                'hours' => 'Retrait aujourd hui jusqu a 22h30',
+            ],
             'current_nav' => 'cart',
         ]);
     }
