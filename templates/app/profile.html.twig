@@ -2,7 +2,7 @@
 
 {% block title %}DrinkIn | Profil{% endblock %}
 
-{% block app_frame_attributes %}data-controller="profile"{% endblock %}
+{% block app_frame_attributes %}data-controller="profile auth"{% endblock %}
 
 {% block app_header %}
     <header class="header">
@@ -72,7 +72,7 @@
                 </div>
             </section>
 
-            <a href="{{ path('app_logout') }}" class="btn btn-outline btn-full">Se deconnecter</a>
+            <button type="button" class="btn btn-outline btn-full" data-action="click->auth#logout">Se deconnecter</button>
         </div>
 
         <section class="sheet" data-profile-target="profileModal" data-action="click->profile#closeProfileModal">

@@ -1,5 +1,6 @@
 const CACHE_NAME = 'drinkin-shell-v2';
 const APP_SHELL = ['/', '/catalogue', '/panier', '/connexion', '/inscription', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png'];
+const NEVER_CACHE_NAVIGATION_PREFIXES = ['/profil', '/commandes', '/paiement', '/admin', '/api', '/deconnexion'];
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
@@ -30,6 +31,12 @@ self.addEventListener('fetch', (event) => {
     }
 
     if (event.request.mode === 'navigate') {
+        if (NEVER_CACHE_NAVIGATION_PREFIXES.some((prefix) => url.pathname === prefix || url.pathname.startsWith(`${prefix}/`))) {
+            event.respondWith(fetch(event.request));
+
+            return;
+        }
+
         event.respondWith(
             fetch(event.request)
                 .then((response) => {

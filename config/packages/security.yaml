@@ -14,22 +14,16 @@ security:
             security: false
         main:
             lazy: true
+            stateless: true
             provider: app_user_provider
-            form_login:
-                login_path: app_login
-                check_path: app_login
-                enable_csrf: true
-                default_target_path: app_catalogue
-            remember_me:
-                secret: '%kernel.secret%'
-                lifetime: 2592000
-                path: /
-            logout:
-                path: app_logout
-                target: app_home
+            custom_authenticators:
+                - App\Security\ApiTokenAuthenticator
+            entry_point: App\Security\ApiTokenAuthenticator
 
     access_control:
         - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/api/me, roles: ROLE_USER }
+        - { path: ^/api/logout, roles: ROLE_USER }
         - { path: ^/api/profile, roles: ROLE_USER }
         - { path: ^/api/orders, roles: ROLE_USER }
         - { path: ^/paiement, roles: ROLE_USER }

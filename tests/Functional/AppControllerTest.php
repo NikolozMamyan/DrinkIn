@@ -8,6 +8,14 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class AppControllerTest extends WebTestCase
 {
+    public function testHomePageRemainsReachableWithoutDatabaseSchema(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/');
+
+        self::assertResponseIsSuccessful();
+    }
+
     public function testPublicPagesAreReachable(): void
     {
         $client = static::createClient();

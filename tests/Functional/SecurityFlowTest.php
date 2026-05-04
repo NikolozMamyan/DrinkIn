@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Tests\Functional;
 
 use App\Entity\User;
+use App\Repository\UserSessionRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class SecurityFlowTest extends WebTestCase
 {
@@ -70,5 +72,59 @@ final class SecurityFlowTest extends WebTestCase
         self::assertInstanceOf(User::class, $user);
         self::assertFalse($user->isDarkModeEnabled());
         self::assertSame('light', $client->getCookieJar()->get('drinkin_theme')?->getValue());
+        self::assertNotNull($client->getCookieJar()->get('AUTH_TOKEN'));
+        self::assertNotNull($client->getCookieJar()->get('DEVICE_ID'));
+    }
+
+    public function testLoginAndLogoutManagePersistentSessions(): void
+    {
+        $client = static::createClient();
+        $container = static::getContainer();
+
+        /** @var EntityManagerInterface $entityManager */
+        $entityManager = $container->get(EntityManagerInterface::class);
+        $schemaTool = new SchemaTool($entityManager);
+        $metadata = $entityManager->getMetadataFactory()->getAllMetadata();
+        $schemaTool->dropSchema($metadata);
+        $schemaTool->createSchema($metadata);
+
+        /** @var UserPasswordHasherInterface $passwordHasher */
+        $passwordHasher = $container->get(UserPasswordHasherInterface::class);
+        $user = (new User())
+            ->setEmail('session@test.local')
+            ->setFirstName('Session')
+            ->setLastName('Tester')
+            ->setRoles(['ROLE_USER']);
+        $user->setPassword($passwordHasher->hashPassword($user, 'Sup3rSecret!42'));
+
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        $client->request('POST', '/api/login', server: ['CONTENT_TYPE' => 'application/json'], content: json_encode([
+            'email' => 'session@test.local',
+            'password' => 'Sup3rSecret!42',
+            'remember' => true,
+        ], JSON_THROW_ON_ERROR));
+
+        self::assertResponseIsSuccessful();
+        self::assertNotNull($client->getCookieJar()->get('AUTH_TOKEN'));
+
+        /** @var UserSessionRepository $sessionRepository */
+        $sessionRepository = $container->get(UserSessionRepository::class);
+        self::assertCount(1, $sessionRepository->findAll());
+
+        $client->request('GET', '/profil');
+        self::assertResponseIsSuccessful();
+
+        $client->request('POST', '/api/logout');
+        self::assertResponseIsSuccessful();
+        self::assertNull($client->getCookieJar()->get('AUTH_TOKEN'));
+        self::assertNull($client->getCookieJar()->get('DEVICE_ID'));
+
+        $storedSession = $sessionRepository->findAll()[0];
+        self::assertTrue($storedSession->isRevoked());
+
+        $client->request('GET', '/profil');
+        self::assertResponseRedirects('/connexion');
     }
 }

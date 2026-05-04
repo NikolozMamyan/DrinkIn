@@ -6,10 +6,11 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\AuthCookieFactory;
+use App\Service\SessionManager;
 use App\Service\ThemePreferenceManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
@@ -19,21 +20,55 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 final class SecurityController extends AbstractController
 {
     #[Route('/connexion', name: 'app_login', methods: ['GET', 'POST'])]
-    public function login(AuthenticationUtils $authenticationUtils): Response
-    {
+    public function login(
+        Request $request,
+        UserRepository $userRepository,
+        UserPasswordHasherInterface $passwordHasher,
+        SessionManager $sessionManager,
+        AuthCookieFactory $authCookieFactory,
+        CsrfTokenManagerInterface $csrfTokenManager,
+    ): Response {
         if ($this->getUser()) {
             return $this->redirectToRoute('app_catalogue');
         }
 
+        $lastUsername = '';
+        $error = null;
+
+        if ($request->isMethod('POST')) {
+            $lastUsername = trim((string) $request->request->get('_username'));
+
+            if (!$csrfTokenManager->isTokenValid(new CsrfToken('authenticate', (string) $request->request->get('_csrf_token')))) {
+                $error = 'Session invalide. Merci de reessayer.';
+            } else {
+                $user = $userRepository->findOneBy(['email' => mb_strtolower($lastUsername)]);
+                if ($user instanceof User && $passwordHasher->isPasswordValid($user, (string) $request->request->get('_password'))) {
+                    [$session, $plainToken, $deviceId] = $sessionManager->createSession(
+                        $user,
+                        null,
+                        $request->request->getBoolean('_remember_me', true),
+                    );
+
+                    $response = $this->redirectToRoute('app_catalogue');
+                    $response->headers->setCookie($authCookieFactory->buildAuthCookie($request, $plainToken, $session->getExpiresAt()));
+                    $response->headers->setCookie($authCookieFactory->buildDeviceCookie($request, $deviceId));
+
+                    return $response;
+                }
+
+                $error = 'Identifiants invalides.';
+            }
+        }
+
         return $this->render('security/login.html.twig', [
-            'last_username' => $authenticationUtils->getLastUsername(),
-            'error' => $authenticationUtils->getLastAuthenticationError(),
+            'last_username' => $lastUsername,
+            'error' => $error,
         ]);
     }
 
@@ -44,7 +79,8 @@ final class SecurityController extends AbstractController
         UserPasswordHasherInterface $passwordHasher,
         EntityManagerInterface $entityManager,
         ThemePreferenceManager $themePreferenceManager,
-        Security $security,
+        SessionManager $sessionManager,
+        AuthCookieFactory $authCookieFactory,
     ): Response {
         if ($this->getUser()) {
             return $this->redirectToRoute('app_catalogue');
@@ -84,9 +120,13 @@ final class SecurityController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', 'Compte cree. Bienvenue sur DrinkIn.');
 
-            $response = $security->login($user, 'form_login', 'main', [new RememberMeBadge()]);
+            [$session, $plainToken, $deviceId] = $sessionManager->createSession($user);
 
-            return $response ?? $this->redirectToRoute('app_catalogue');
+            $response = $this->redirectToRoute('app_catalogue');
+            $response->headers->setCookie($authCookieFactory->buildAuthCookie($request, $plainToken, $session->getExpiresAt()));
+            $response->headers->setCookie($authCookieFactory->buildDeviceCookie($request, $deviceId));
+
+            return $response;
         }
 
         return $this->render('security/register.html.twig', [
@@ -95,8 +135,29 @@ final class SecurityController extends AbstractController
     }
 
     #[Route('/deconnexion', name: 'app_logout', methods: ['GET'])]
-    public function logout(): never
+    public function logout(Request $request, SessionManager $sessionManager, AuthCookieFactory $authCookieFactory): Response
     {
-        throw new \LogicException('Logout is managed by Symfony security.');
+        $request->attributes->set('_skip_auth_token_refresh', true);
+
+        $plainToken = $request->cookies->get(AuthCookieFactory::AUTH_COOKIE_NAME);
+        if (is_string($plainToken)) {
+            $session = $sessionManager->findActiveSessionByPlainToken($plainToken);
+            if (null !== $session) {
+                $sessionManager->revoke($session, 'logout');
+            }
+        }
+
+        $request->getSession()->invalidate();
+        $response = $this->redirectToRoute('app_home');
+        $response->headers->setCookie($authCookieFactory->clearAuthCookie($request));
+        $response->headers->setCookie($authCookieFactory->clearDeviceCookie($request));
+        $phpSessionCookie = $authCookieFactory->clearPhpSessionCookie($request);
+        if (null !== $phpSessionCookie) {
+            $response->headers->setCookie($phpSessionCookie);
+        }
+        $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        $response->headers->set('Pragma', 'no-cache');
+
+        return $response;
     }
 }

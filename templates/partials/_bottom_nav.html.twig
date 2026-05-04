@@ -15,11 +15,11 @@
             </span>
             <span>Panier</span>
         </a>
-        <a href="{{ path('app_orders') }}" class="nav-item {{ current_nav == 'orders' ? 'active' : '' }}">
+        <a href="{{ app.user ? path('app_orders') : path('app_login') }}" class="nav-item {{ current_nav == 'orders' ? 'active' : '' }}">
             <span class="nav-icon"><i class="fa-solid fa-box"></i></span>
             <span>Commandes</span>
         </a>
-        <a href="{{ path('app_profile') }}" class="nav-item {{ current_nav == 'profile' ? 'active' : '' }}">
+        <a href="{{ app.user ? path('app_profile') : path('app_login') }}" class="nav-item {{ current_nav == 'profile' ? 'active' : '' }}">
             <span class="nav-icon"><i class="fa-solid fa-user"></i></span>
             <span>Profil</span>
         </a>

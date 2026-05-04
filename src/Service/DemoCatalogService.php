@@ -8,7 +8,9 @@ use App\Entity\Category;
 use App\Entity\Product;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
+use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\ToolsException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class DemoCatalogService
@@ -22,6 +24,8 @@ final class DemoCatalogService
      * @var list<array<string, mixed>>|null
      */
     private ?array $categoriesCache = null;
+
+    private bool $schemaAvailable = true;
 
     public function __construct(
         private readonly ProductRepository $productRepository,
@@ -40,6 +44,10 @@ final class DemoCatalogService
         }
 
         $this->seedIfEmpty();
+
+        if (!$this->schemaAvailable) {
+            return $this->categoriesCache = $this->fallbackCategories();
+        }
 
         $normalized = $this->categoryRepository->findCatalogCategoriesWithProductCount();
         array_unshift($normalized, [
@@ -63,6 +71,10 @@ final class DemoCatalogService
 
         $this->seedIfEmpty();
 
+        if (!$this->schemaAvailable) {
+            return $this->productsCache = $this->fallbackProducts();
+        }
+
         return $this->productsCache = array_map(
             fn (Product $product): array => $this->normalizeProduct($product),
             $this->productRepository->findCatalogProducts(),
@@ -84,6 +96,16 @@ final class DemoCatalogService
     {
         $this->seedIfEmpty();
 
+        if (!$this->schemaAvailable) {
+            foreach ($this->fallbackProducts() as $product) {
+                if ($product['slug'] === $slug) {
+                    return $product;
+                }
+            }
+
+            throw new NotFoundHttpException(sprintf('Unknown product "%s".', $slug));
+        }
+
         $product = $this->productRepository->findOneBy(['slug' => $slug]);
         if (!$product instanceof Product) {
             throw new NotFoundHttpException(sprintf('Unknown product "%s".', $slug));
@@ -94,7 +116,13 @@ final class DemoCatalogService
 
     public function seedIfEmpty(): void
     {
-        if (0 !== $this->categoryRepository->count([]) || 0 !== $this->productRepository->count([])) {
+        try {
+            if (0 !== $this->categoryRepository->count([]) || 0 !== $this->productRepository->count([])) {
+                return;
+            }
+        } catch (TableNotFoundException|ToolsException) {
+            $this->schemaAvailable = false;
+
             return;
         }
 

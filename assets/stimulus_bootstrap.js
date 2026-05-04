@@ -8,6 +8,7 @@ import CheckoutController from './controllers/checkout_controller.js';
 import ToastController from './controllers/toast_controller.js';
 import MeterController from './controllers/meter_controller.js';
 import InstallController from './controllers/install_controller.js';
+import AuthController from './controllers/auth_controller.js';
 
 const app = startStimulusApp();
 
@@ -20,3 +21,4 @@ app.register('checkout', CheckoutController);
 app.register('toast', ToastController);
 app.register('meter', MeterController);
 app.register('install', InstallController);
+app.register('auth', AuthController);
