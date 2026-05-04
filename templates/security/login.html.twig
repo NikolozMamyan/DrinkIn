@@ -15,6 +15,10 @@
             <form method="post">
                 <input type="email" name="_username" value="{{ last_username }}" class="form-input" placeholder="Email" autocomplete="email" required>
                 <input type="password" name="_password" class="form-input" placeholder="Mot de passe" autocomplete="current-password" required>
+                <label class="checkbox-row">
+                    <input type="checkbox" name="_remember_me" checked>
+                    <span>Rester connecte sur cet appareil</span>
+                </label>
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
                 <button class="btn btn-primary btn-full" type="submit">Se connecter</button>
             </form>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'drinkin-shell-v1';
+const CACHE_NAME = 'drinkin-shell-v2';
 const APP_SHELL = ['/', '/catalogue', '/panier', '/connexion', '/inscription', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png'];
 
 self.addEventListener('install', (event) => {
@@ -44,18 +44,22 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    if (url.pathname.startsWith('/api/')) {
+        event.respondWith(fetch(event.request));
+
+        return;
+    }
+
     event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-            const networkResponse = fetch(event.request).then((response) => {
+        fetch(event.request)
+            .then((response) => {
                 if (response.ok) {
                     const responseClone = response.clone();
                     caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
                 }
 
                 return response;
-            });
-
-            return cachedResponse || networkResponse;
-        }),
+            })
+            .catch(async () => caches.match(event.request)),
     );
 });

@@ -2,6 +2,10 @@
     --bg: #0d0d1a;
     --bg-card: #161626;
     --bg-surface: #1e1e34;
+    --bg-frame: linear-gradient(180deg, rgba(13, 13, 26, 0.96), rgba(13, 13, 26, 1));
+    --glass-surface: rgba(13, 13, 26, 0.88);
+    --glass-surface-strong: rgba(13, 13, 26, 0.92);
+    --popup-surface: linear-gradient(145deg, rgba(30, 30, 52, 0.98), rgba(13, 13, 26, 0.98));
     --gold: #f0a500;
     --gold-light: #ffc13d;
     --gold-dim: rgba(240, 165, 0, 0.12);
@@ -48,13 +52,64 @@ body.has-overlay {
 }
 
 body.theme-soft-light {
-    --bg: #f4f1e8;
+    --bg: #f6f1e4;
     --bg-card: #fffaf0;
-    --bg-surface: #f0e7d5;
-    --text: #1f1b27;
-    --muted: #6f6475;
-    --border: rgba(139, 26, 74, 0.14);
+    --bg-surface: #efe4cf;
+    --bg-frame: linear-gradient(180deg, rgba(250, 245, 234, 0.98), rgba(242, 233, 214, 1));
+    --glass-surface: rgba(255, 250, 240, 0.9);
+    --glass-surface-strong: rgba(255, 249, 237, 0.95);
+    --popup-surface: linear-gradient(145deg, rgba(255, 250, 240, 0.98), rgba(244, 235, 217, 0.98));
+    --gold: #b87500;
+    --gold-light: #d5961b;
+    --gold-dim: rgba(184, 117, 0, 0.12);
+    --wine: #7c2b49;
+    --text: #201a24;
+    --muted: #6d6170;
+    --border: rgba(124, 43, 73, 0.14);
     --shadow: 0 16px 40px rgba(56, 39, 23, 0.12);
+}
+
+body.theme-soft-light {
+    background:
+        radial-gradient(circle at top right, rgba(124, 43, 73, 0.14), transparent 28%),
+        radial-gradient(circle at top left, rgba(184, 117, 0, 0.12), transparent 22%),
+        var(--bg);
+}
+
+body.theme-soft-light .hero-banner {
+    background: linear-gradient(135deg, rgba(255, 247, 233, 0.98) 0%, rgba(248, 237, 214, 0.98) 58%, rgba(243, 225, 196, 0.98) 100%);
+}
+
+body.theme-soft-light .product-hero {
+    background: linear-gradient(180deg, rgba(255, 244, 224, 0.96) 0%, var(--bg) 100%);
+}
+
+body.theme-soft-light .product-price-card {
+    background: linear-gradient(180deg, rgba(255, 248, 237, 0.98), rgba(245, 234, 214, 0.98));
+}
+
+body.theme-soft-light .taste-bar,
+body.theme-soft-light .loyalty-bar {
+    background: rgba(124, 43, 73, 0.1);
+}
+
+body.theme-soft-light .loyalty-card {
+    background: linear-gradient(135deg, rgba(255, 246, 231, 0.98) 0%, rgba(247, 235, 212, 0.98) 100%);
+}
+
+body.theme-soft-light .catalog-hero {
+    background: linear-gradient(135deg, rgba(255, 246, 230, 0.98), rgba(246, 233, 208, 0.98), rgba(239, 226, 204, 0.98));
+}
+
+body.theme-soft-light .catalog-hero-icon {
+    background: rgba(255, 250, 240, 0.88);
+    border-color: rgba(184, 117, 0, 0.18);
+}
+
+body.theme-soft-light .stripe-card,
+body.theme-soft-light .card-back,
+body.theme-soft-light .checkout-success-card {
+    background: linear-gradient(135deg, rgba(255, 248, 238, 0.98), rgba(243, 232, 214, 0.98));
 }
 
 input:-webkit-autofill,
@@ -90,7 +145,7 @@ button {
     max-width: 430px;
     min-height: 100dvh;
     margin: 0 auto;
-    background: linear-gradient(180deg, rgba(13, 13, 26, 0.96), rgba(13, 13, 26, 1));
+    background: var(--bg-frame);
     overflow-x: hidden;
     overflow-y: visible;
 }
@@ -105,7 +160,7 @@ button {
 .admin-panel {
     border: 1px solid var(--border);
     border-radius: 20px;
-    background: rgba(22, 22, 38, 0.94);
+    background: var(--bg-card);
     box-shadow: var(--shadow);
 }
 
@@ -196,7 +251,7 @@ button {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(13, 13, 26, 0.88);
+    background: var(--glass-surface);
     border-bottom: 1px solid var(--border);
     backdrop-filter: blur(20px) saturate(180%);
 }
@@ -265,7 +320,7 @@ button {
 }
 
 .round-btn {
-    background: rgba(13, 13, 26, 0.72);
+    background: var(--glass-surface-strong);
     backdrop-filter: blur(12px);
 }
 
@@ -304,7 +359,7 @@ button {
     max-width: 430px;
     height: calc(var(--nav-h) + var(--safe-bot));
     padding-bottom: var(--safe-bot);
-    background: rgba(13, 13, 26, 0.92);
+    background: var(--glass-surface-strong);
     border-top: 1px solid var(--border);
     backdrop-filter: blur(24px) saturate(180%);
 }
@@ -319,7 +374,7 @@ button {
     padding: 16px 16px 14px;
     border-radius: 22px;
     border: 1px solid rgba(240, 165, 0, 0.24);
-    background: linear-gradient(145deg, rgba(30, 30, 52, 0.98), rgba(13, 13, 26, 0.98));
+    background: var(--popup-surface);
     box-shadow: 0 24px 48px rgba(0, 0, 0, 0.34);
 }
 
@@ -1078,7 +1133,7 @@ textarea.form-input::placeholder {
     display: flex;
     align-items: center;
     gap: 12px;
-    background: rgba(13, 13, 26, 0.92);
+    background: var(--glass-surface-strong);
     border-top: 1px solid var(--border);
     backdrop-filter: blur(18px);
     z-index: 90;
@@ -1414,6 +1469,7 @@ select.form-input {
     inset: 0;
     z-index: 300;
     display: none;
+    pointer-events: none;
     align-items: flex-end;
     background: rgba(0, 0, 0, 0.7);
 }
@@ -1421,6 +1477,7 @@ select.form-input {
 .sheet.is-open,
 .modal-overlay.is-open {
     display: flex;
+    pointer-events: auto;
 }
 
 .sheet-inner,

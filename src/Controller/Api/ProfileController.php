@@ -40,7 +40,7 @@ final class ProfileController extends AbstractController
     }
 
     #[Route('/preferences', name: 'preferences', methods: ['POST'])]
-    public function preferences(Request $request, ProfileManagerService $profileManagerService): JsonResponse
+    public function preferences(Request $request, ProfileManagerService $profileManagerService, DemoProfileService $profileService): JsonResponse
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
         /** @var User $user */
@@ -56,7 +56,10 @@ final class ProfileController extends AbstractController
             return $this->json(['ok' => false], 422);
         }
 
-        return $this->json(['ok' => true]);
+        return $this->json([
+            'ok' => true,
+            'profile' => $profileService->build($user),
+        ]);
     }
 
     #[Route('/addresses', name: 'create_address', methods: ['POST'])]

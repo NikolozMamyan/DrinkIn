@@ -47,20 +47,26 @@ export default class extends Controller {
         button.classList.toggle('is-on', enabled);
         button.setAttribute('aria-pressed', enabled ? 'true' : 'false');
 
+        if (key === 'darkModeEnabled') {
+            this.applyThemePreference(enabled);
+            this.persistThemeLocally(enabled);
+        }
+
         try {
             await this.ensureBrowserCapability(key, enabled);
 
-            const response = await fetch('/api/profile/preferences', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                body: JSON.stringify({ key, enabled }),
-            });
+            const response = await this.submitPreference(key, enabled);
 
             if (!response.ok) {
                 throw new Error('Impossible de sauvegarder ce parametre.');
             }
 
-            if (key === 'darkModeEnabled') {
+            const payload = await response.json();
+            if (payload.profile) {
+                this.refreshProfile(payload.profile);
+            } else if (key === 'darkModeEnabled' && typeof payload.darkModeEnabled === 'boolean') {
+                this.applyThemePreference(payload.darkModeEnabled);
+            } else if (key === 'darkModeEnabled') {
                 this.applyThemePreference(enabled);
             }
 
@@ -71,6 +77,7 @@ export default class extends Controller {
 
             if (key === 'darkModeEnabled') {
                 this.applyThemePreference(previous);
+                this.persistThemeLocally(previous);
             }
 
             this.toast(error.message || 'Impossible de mettre a jour ce parametre.');
@@ -259,6 +266,22 @@ export default class extends Controller {
         document.body.classList.toggle('has-overlay', activeOverlay);
     }
 
+    submitPreference(key, enabled) {
+        if (key === 'darkModeEnabled') {
+            return fetch('/api/preferences/theme', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({ darkModeEnabled: enabled }),
+            });
+        }
+
+        return fetch('/api/profile/preferences', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            body: JSON.stringify({ key, enabled }),
+        });
+    }
+
     currentDarkModeState() {
         const button = this.element.querySelector('.toggle-switch[data-key="darkModeEnabled"]');
 
@@ -267,6 +290,21 @@ export default class extends Controller {
 
     applyThemePreference(enabled) {
         document.body.classList.toggle('theme-soft-light', !enabled);
+        const themeColor = document.querySelector('meta[name="theme-color"]');
+        if (themeColor) {
+            themeColor.setAttribute('content', enabled ? '#0d0d1a' : '#f6f1e4');
+        }
+    }
+
+    persistThemeLocally(enabled) {
+        const value = enabled ? 'dark' : 'light';
+
+        try {
+            window.localStorage.setItem('drinkin_theme', value);
+        } catch {
+        }
+
+        document.cookie = `drinkin_theme=${value}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
     }
 
     async ensureBrowserCapability(key, enabled) {
