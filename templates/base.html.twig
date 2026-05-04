@@ -24,11 +24,13 @@
         {% endblock %}
     </head>
     <body class="{% if themePreference == 'light' %}theme-soft-light {% endif %}{% block body_class %}{% endblock %}">
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="flash flash-{{ label }}">{{ message }}</div>
+        <div class="flash-stack">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="flash flash-{{ label }}">{{ message }}</div>
+                {% endfor %}
             {% endfor %}
-        {% endfor %}
+        </div>
 
         {% block body %}{% endblock %}
     </body>
