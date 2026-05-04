@@ -3,20 +3,140 @@
 {% block title %}DrinkIn | Inscription{% endblock %}
 
 {% block body %}
-    <main class="auth-shell">
-        <section class="auth-card">
+<main class="auth-shell">
+    <div class="auth-wrapper">
+
+        <div class="auth-brand">
+            <div class="auth-logo-icon">
+                <i class="fa-solid fa-wine-glass"></i>
+            </div>
+            <p class="auth-logo-text">Drink<em>In</em></p>
+            <p class="auth-tagline">Rejoignez la communaute</p>
+        </div>
+
+        <section class="auth-card" id="auth-card">
             <p class="section-eyebrow">Nouveau compte</p>
-            <h1 class="headline">Creez votre acces DrinkIn</h1>
-            {{ form_start(registrationForm) }}
-                {{ form_row(registrationForm.firstName, { row_attr: { class: 'form-stack' }, attr: { class: 'form-input' } }) }}
-                {{ form_row(registrationForm.lastName, { row_attr: { class: 'form-stack' }, attr: { class: 'form-input' } }) }}
-                {{ form_row(registrationForm.email, { row_attr: { class: 'form-stack' }, attr: { class: 'form-input' } }) }}
-                {{ form_row(registrationForm.phone, { row_attr: { class: 'form-stack' }, attr: { class: 'form-input' } }) }}
-                {{ form_row(registrationForm.plainPassword.first, { row_attr: { class: 'form-stack' }, attr: { class: 'form-input' } }) }}
-                {{ form_row(registrationForm.plainPassword.second, { row_attr: { class: 'form-stack' }, attr: { class: 'form-input' } }) }}
-                {{ form_row(registrationForm.submit, { attr: { class: 'btn btn-primary btn-full' } }) }}
+            <h1 class="auth-card-title">Creez votre acces DrinkIn</h1>
+
+            {{ form_start(registrationForm, { attr: { class: 'auth-form', id: 'auth-form' } }) }}
+
+                <div class="auth-input-row">
+                    <div class="auth-field">
+                        <div class="auth-input-wrap">
+                            <i class="fa-solid fa-user auth-field-icon"></i>
+                            {{ form_widget(registrationForm.firstName, { attr: { class: 'form-input auth-input', placeholder: 'Prenom' } }) }}
+                        </div>
+                        {{ form_errors(registrationForm.firstName) }}
+                    </div>
+                    <div class="auth-field">
+                        <div class="auth-input-wrap">
+                            <i class="fa-solid fa-user auth-field-icon"></i>
+                            {{ form_widget(registrationForm.lastName, { attr: { class: 'form-input auth-input', placeholder: 'Nom' } }) }}
+                        </div>
+                        {{ form_errors(registrationForm.lastName) }}
+                    </div>
+                </div>
+
+                <div class="auth-field">
+                    <div class="auth-input-wrap">
+                        <i class="fa-solid fa-envelope auth-field-icon"></i>
+                        {{ form_widget(registrationForm.email, { attr: { class: 'form-input auth-input', placeholder: 'Adresse email' } }) }}
+                    </div>
+                    {{ form_errors(registrationForm.email) }}
+                </div>
+
+                <div class="auth-field">
+                    <div class="auth-input-wrap">
+                        <i class="fa-solid fa-phone auth-field-icon"></i>
+                        {{ form_widget(registrationForm.phone, { attr: { class: 'form-input auth-input', placeholder: 'Telephone (optionnel)' } }) }}
+                    </div>
+                    {{ form_errors(registrationForm.phone) }}
+                </div>
+
+                <div class="auth-field">
+                    <div class="auth-input-wrap">
+                        <i class="fa-solid fa-lock auth-field-icon"></i>
+                        {{ form_widget(registrationForm.plainPassword.first, { attr: { class: 'form-input auth-input auth-input-pw', placeholder: 'Mot de passe', autocomplete: 'new-password' } }) }}
+                        <button type="button" class="auth-eye-btn" aria-label="Afficher">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    {{ form_errors(registrationForm.plainPassword.first) }}
+                </div>
+
+                <div class="auth-field">
+                    <div class="auth-input-wrap">
+                        <i class="fa-solid fa-lock auth-field-icon"></i>
+                        {{ form_widget(registrationForm.plainPassword.second, { attr: { class: 'form-input auth-input auth-input-pw', placeholder: 'Confirmer le mot de passe', autocomplete: 'new-password' } }) }}
+                        <button type="button" class="auth-eye-btn" aria-label="Afficher">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    {{ form_errors(registrationForm.plainPassword) }}
+                </div>
+
+                <div hidden>{{ form_widget(registrationForm.submit) }}</div>
+
+                <button class="btn btn-primary btn-full auth-submit-btn" type="submit">
+                    <span class="auth-btn-text">
+                        <i class="fa-solid fa-user-plus"></i>
+                        Creer mon compte
+                    </span>
+                    <span class="auth-spinner" hidden aria-hidden="true">
+                        <i class="fa-solid fa-circle-notch fa-spin"></i>
+                        Creation du compte...
+                    </span>
+                </button>
+
             {{ form_end(registrationForm) }}
-            <p class="small-copy">Deja inscrit ? <a class="link-accent" href="{{ path('app_login') }}">Connexion</a></p>
+
+            <div class="auth-divider"><span>Deja inscrit ?</span></div>
+            <a href="{{ path('app_login') }}" class="btn btn-outline btn-full">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                Se connecter
+            </a>
         </section>
-    </main>
+    </div>
+</main>
+
+<script>
+(function () {
+    var card = document.getElementById('auth-card');
+    var form = document.getElementById('auth-form');
+
+    // Shake si erreurs (flash ou inline)
+    var hasError = document.querySelector('.flash-error, .auth-field ul li, .auth-field div.form-error') !== null;
+    if (hasError && card) {
+        card.classList.add('auth-shake');
+        card.addEventListener('animationend', function () {
+            card.classList.remove('auth-shake');
+        }, { once: true });
+    }
+
+    // Spinner on submit
+    if (form) {
+        form.addEventListener('submit', function () {
+            var btn = form.querySelector('.auth-submit-btn');
+            if (!btn) return;
+            btn.querySelector('.auth-btn-text').hidden = true;
+            btn.querySelector('.auth-spinner').hidden = false;
+            btn.disabled = true;
+        });
+    }
+
+    // Password toggles
+    document.querySelectorAll('.auth-eye-btn').forEach(function (eyeBtn) {
+        eyeBtn.addEventListener('click', function () {
+            var wrap = eyeBtn.closest('.auth-input-wrap');
+            var input = wrap ? wrap.querySelector('input') : null;
+            if (!input) return;
+            var icon = eyeBtn.querySelector('i');
+            var isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            icon.classList.toggle('fa-eye', !isPassword);
+            icon.classList.toggle('fa-eye-slash', isPassword);
+        });
+    });
+})();
+</script>
 {% endblock %}
