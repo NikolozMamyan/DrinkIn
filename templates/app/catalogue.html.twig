@@ -56,21 +56,6 @@
                     </button>
                 </div>
 
-                <section data-catalog-target="categorySection">
-                    <div class="section-header">
-                        <h2>Explorer par categorie</h2>
-                    </div>
-                    <div class="product-grid category-grid">
-                        {% for category in categories|slice(1, 6) %}
-                            <button class="product-card card-body category-card" type="button" data-action="click->catalog#setCategory" data-catalog-category-param="{{ category.slug }}">
-                                <div class="img-wrap"><i class="fa-solid fa-{{ category.icon }}"></i></div>
-                                <p class="card-name">{{ category.name }}</p>
-                                <p class="card-sub">{{ category.count }} refs</p>
-                            </button>
-                        {% endfor %}
-                    </div>
-                </section>
-
                 <section class="catalog-results">
                     <div class="results-info">
                         <span data-catalog-target="count">{{ products|length }} produits</span>
@@ -102,15 +87,15 @@
             </div>
         </main>
 
-        <div class="sheet" data-catalog-target="sortSheet" data-action="click->catalog#closeSort">
+        <div class="sheet catalog-sort-sheet" data-catalog-target="sortSheet" data-action="click->catalog#closeSort">
             <div class="sheet-inner">
                 <div class="sheet-handle"></div>
                 <h2 class="section-title">Trier par</h2>
-                <div class="utility-stack">
-                    <button type="button" class="menu-item active" data-sort-option="featured" data-action="click->catalog#setSort" data-catalog-sort-param="featured"><span class="menu-label">Pertinence</span><i class="fa-solid fa-circle-check"></i></button>
-                    <button type="button" class="menu-item" data-sort-option="price-asc" data-action="click->catalog#setSort" data-catalog-sort-param="price-asc"><span class="menu-label">Prix croissant</span></button>
-                    <button type="button" class="menu-item" data-sort-option="price-desc" data-action="click->catalog#setSort" data-catalog-sort-param="price-desc"><span class="menu-label">Prix decroissant</span></button>
-                    <button type="button" class="menu-item" data-sort-option="rating" data-action="click->catalog#setSort" data-catalog-sort-param="rating"><span class="menu-label">Mieux notes</span></button>
+                <div class="utility-stack catalog-sort-options">
+                    <button type="button" class="menu-item catalog-sort-option active" data-sort-option="featured" data-action="click->catalog#setSort" data-catalog-sort-param="featured"><span class="menu-label">Pertinence</span><i class="fa-solid fa-circle-check"></i></button>
+                    <button type="button" class="menu-item catalog-sort-option" data-sort-option="price-asc" data-action="click->catalog#setSort" data-catalog-sort-param="price-asc"><span class="menu-label">Prix croissant</span><i class="fa-solid fa-circle-check"></i></button>
+                    <button type="button" class="menu-item catalog-sort-option" data-sort-option="price-desc" data-action="click->catalog#setSort" data-catalog-sort-param="price-desc"><span class="menu-label">Prix decroissant</span><i class="fa-solid fa-circle-check"></i></button>
+                    <button type="button" class="menu-item catalog-sort-option" data-sort-option="rating" data-action="click->catalog#setSort" data-catalog-sort-param="rating"><span class="menu-label">Mieux notes</span><i class="fa-solid fa-circle-check"></i></button>
                 </div>
             </div>
         </div>

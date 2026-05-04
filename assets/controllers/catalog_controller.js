@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['search', 'listView', 'gridView', 'count', 'categorySection', 'sortSheet', 'emptyState'];
+    static targets = ['search', 'listView', 'gridView', 'count', 'sortSheet', 'emptyState'];
     static values = {
         currentCategory: { type: String, default: 'all' },
         currentView: { type: String, default: 'list' },
@@ -15,6 +15,8 @@ export default class extends Controller {
         this.gridItems = this.hasGridViewTarget
             ? Array.from(this.gridViewTarget.querySelectorAll('[data-category][data-name]'))
             : [];
+
+        this.syncControls();
 
         if (this.listItems.length > 0 || this.gridItems.length > 0) {
             this.filterProducts();
@@ -38,10 +40,7 @@ export default class extends Controller {
         this.currentViewValue = event.params.view;
         this.listViewTarget.hidden = this.currentViewValue !== 'list';
         this.gridViewTarget.hidden = this.currentViewValue !== 'grid';
-
-        this.element.querySelectorAll('[data-view-btn]').forEach((button) => {
-            button.classList.toggle('active', button.dataset.viewBtn === this.currentViewValue);
-        });
+        this.syncControls();
     }
 
     setCategory(event) {
@@ -63,9 +62,7 @@ export default class extends Controller {
         this.currentSortValue = event.params.sort;
         this.sortCollection(this.listItems, this.listViewTarget);
         this.sortCollection(this.gridItems, this.gridViewTarget);
-        this.element.querySelectorAll('[data-sort-option]').forEach((button) => {
-            button.classList.toggle('active', button.dataset.sortOption === this.currentSortValue);
-        });
+        this.syncControls();
         this.closeSort();
         this.filterProducts();
     }
@@ -89,10 +86,6 @@ export default class extends Controller {
 
         if (this.hasCountTarget) {
             this.countTarget.textContent = `${visible} produit${visible > 1 ? 's' : ''}`;
-        }
-
-        if (this.hasCategorySectionTarget) {
-            this.categorySectionTarget.hidden = query !== '';
         }
 
         if (this.hasEmptyStateTarget) {
@@ -172,6 +165,16 @@ export default class extends Controller {
         document.querySelectorAll('.badge').forEach((badge) => {
             badge.textContent = count;
             badge.hidden = count === 0;
+        });
+    }
+
+    syncControls() {
+        this.element.querySelectorAll('[data-view-btn]').forEach((button) => {
+            button.classList.toggle('active', button.dataset.viewBtn === this.currentViewValue);
+        });
+
+        this.element.querySelectorAll('[data-sort-option]').forEach((button) => {
+            button.classList.toggle('active', button.dataset.sortOption === this.currentSortValue);
         });
     }
 }
