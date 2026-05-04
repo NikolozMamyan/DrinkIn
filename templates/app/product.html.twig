@@ -1,0 +1,128 @@
+{% extends 'layouts/app.html.twig' %}
+
+{% block title %}DrinkIn | {{ product.name }}{% endblock %}
+
+{% block app_body %}
+    <div
+        data-controller="product"
+        data-product-unit-price-value="{{ product.price }}"
+        data-product-product-id-value="{{ product.id }}"
+        data-product-product-slug-value="{{ product.slug }}"
+    >
+        <main class="page page-product">
+            <div class="product-hero">
+                <i class="fa-solid fa-{{ product.icon }}"></i>
+                <div class="product-overlay-actions">
+                    <a href="{{ path('app_catalogue') }}" class="round-btn"><i class="fa-solid fa-arrow-left"></i></a>
+                    <span class="discount-badge">{{ product.badge ?: 'Selection' }}</span>
+                    <button type="button" class="round-btn" data-product-target="favorite" data-action="click->product#toggleFavorite"><i class="fa-regular fa-heart"></i></button>
+                </div>
+            </div>
+
+            <div class="utility-stack product-page-content">
+                <section class="product-summary">
+                    <div class="row-between">
+                        <span class="section-eyebrow">{{ product.type }}</span>
+                        <span class="rating-count"><i class="fa-solid fa-star"></i> {{ product.rating }} ({{ product.ratingCount }} avis)</span>
+                    </div>
+                    <h1 class="product-name-xl">{{ product.name }}</h1>
+                    <p class="muted">{{ product.region }} - {{ product.country }} - {{ product.abv }}</p>
+                    <div class="chip-row stack-top-16">
+                        <span class="chip"><i class="fa-solid fa-wine-bottle"></i> {{ product.volume }}</span>
+                        <span class="chip"><i class="fa-solid fa-fire"></i> {{ product.abv }}</span>
+                        <span class="chip"><i class="fa-solid fa-award"></i> Premium</span>
+                    </div>
+                </section>
+
+                <section class="product-price-card">
+                    <div class="product-price-block">
+                        <div class="inline-actions">
+                            <span class="price-xl">{{ (product.price / 100)|number_format(2, ',', ' ') }}EUR</span>
+                            {% if product.comparePrice %}
+                                <span class="muted"><s>{{ (product.comparePrice / 100)|number_format(2, ',', ' ') }}EUR</s></span>
+                            {% endif %}
+                        </div>
+                        <span class="discount-badge">{{ product.badge ?: 'Choix du moment' }}</span>
+                    </div>
+                </section>
+
+                <section>
+                    <div class="tabs-line">
+                        <button type="button" class="tab-line active" data-product-target="tab" data-tab="description" data-action="click->product#switchTab" data-product-tab-param="description">Description</button>
+                        <button type="button" class="tab-line" data-product-target="tab" data-tab="details" data-action="click->product#switchTab" data-product-tab-param="details">Details</button>
+                        <button type="button" class="tab-line" data-product-target="tab" data-tab="avis" data-action="click->product#switchTab" data-product-tab-param="avis">Avis</button>
+                    </div>
+
+                    <div data-product-target="panel" data-panel="description">
+                        <p class="product-copy">{{ product.description }}</p>
+                        <div class="taste-panel stack-top-16">
+                            <p class="section-eyebrow">Notes de degustation</p>
+                            {% for label, value in product.tastingProfile %}
+                                <div class="taste-row">
+                                    <div class="row-between">
+                                        <span>{{ label }}</span>
+                                        <span class="t-price">{{ value }}%</span>
+                                    </div>
+                                    <div class="taste-bar"><div class="taste-bar-fill" data-controller="meter" data-meter-width-value="{{ value }}"></div></div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div data-product-target="panel" data-panel="details" hidden>
+                        <div class="summary-box">
+                            <div class="summary-row"><span>Origine</span><span>{{ product.country }}</span></div>
+                            <div class="summary-row"><span>Region</span><span>{{ product.region }}</span></div>
+                            <div class="summary-row"><span>Format</span><span>{{ product.volume }}</span></div>
+                        </div>
+                    </div>
+
+                    <div data-product-target="panel" data-panel="avis" hidden>
+                        <div class="summary-box">
+                            <div class="summary-row"><span>Moyenne</span><span>{{ product.rating }}/5</span></div>
+                            <div class="summary-row"><span>Avis</span><span>{{ product.ratingCount }}</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="row-between product-qty-row">
+                    <span class="section-title">Quantite</span>
+                    <div class="qty-selector">
+                        <button type="button" class="qty-btn-lg" data-action="click->product#decrement">-</button>
+                        <span data-product-target="quantity">1</span>
+                        <button type="button" class="qty-btn-lg" data-action="click->product#increment">+</button>
+                    </div>
+                </section>
+
+                <section>
+                    <div class="section-header">
+                        <h2>Vous aimerez aussi</h2>
+                    </div>
+                    <div class="related-scroll">
+                        <div class="related-row">
+                            {% for related in relatedProducts %}
+                                <a href="{{ path('app_product_show', { slug: related.slug }) }}" class="related-card">
+                                    <div class="r-img"><i class="fa-solid fa-{{ related.icon }}"></i></div>
+                                    <div class="r-body">
+                                        <p class="card-name">{{ related.name }}</p>
+                                        <p class="t-price">{{ (related.price / 100)|number_format(2, ',', ' ') }}EUR</p>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <div class="sticky-footer sticky-footer-product">
+            <div class="sticky-footer-total">
+                <p class="small-copy">Total</p>
+                <p class="t-price" data-product-target="total"></p>
+            </div>
+            <button type="button" class="btn btn-primary btn-full sticky-footer-button" data-product-target="submitButton" data-action="click->product#addToCart">
+                <i class="fa-solid fa-cart-shopping"></i> Ajouter au panier
+            </button>
+        </div>
+    </div>
+{% endblock %}

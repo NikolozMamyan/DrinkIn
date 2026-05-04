@@ -1,0 +1,118 @@
+{% extends 'layouts/app.html.twig' %}
+
+{% block title %}DrinkIn | Catalogue{% endblock %}
+
+{% block app_header %}
+    <header class="header">
+        <div class="header-title">
+            <a href="{{ path('app_home') }}" class="icon-btn"><i class="fa-solid fa-arrow-left"></i></a>
+            <span>Catalogue</span>
+        </div>
+        <a href="{{ path('app_cart') }}" class="icon-btn">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span class="badge" {{ cart.count > 0 ? '' : 'hidden' }}>{{ cart.count }}</span>
+        </a>
+    </header>
+{% endblock %}
+
+{% block app_body %}
+    <div data-controller="catalog">
+        <main class="page">
+            <div class="utility-stack">
+                <section class="catalog-hero">
+                    <p class="section-eyebrow">Selection premium</p>
+                    <div class="row-between">
+                        <div>
+                            <h1 class="headline">Trouvez la bonne bouteille sans perdre de temps.</h1>
+                            <p class="small-copy">Recherche instantanee, tri rapide et ajout panier en un geste.</p>
+                        </div>
+                        <div class="catalog-hero-icon"><i class="fa-solid fa-bottle-droplet"></i></div>
+                    </div>
+                </section>
+
+                <div class="search-input-wrap search-input-strong">
+                    <i class="fa-solid fa-magnifying-glass muted"></i>
+                    <input type="text" placeholder="Vins, whiskys, bieres..." data-catalog-target="search" data-action="input->catalog#queueFilterProducts">
+                    <button type="button" class="icon-btn icon-btn-sm" data-action="click->catalog#clearSearch"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <div class="catalog-toolbar">
+                    <div class="filter-bar">
+                        {% for category in categories %}
+                            <button
+                                type="button"
+                                class="filter-chip {{ loop.first ? 'active' : '' }}"
+                                data-category-chip="{{ category.slug }}"
+                                data-action="click->catalog#setCategory"
+                                data-catalog-category-param="{{ category.slug }}"
+                            >
+                                {{ category.name }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="catalog-sort-btn" data-action="click->catalog#openSort">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span>Trier</span>
+                    </button>
+                </div>
+
+                <section data-catalog-target="categorySection">
+                    <div class="section-header">
+                        <h2>Explorer par categorie</h2>
+                    </div>
+                    <div class="product-grid category-grid">
+                        {% for category in categories|slice(1, 6) %}
+                            <button class="product-card card-body category-card" type="button" data-action="click->catalog#setCategory" data-catalog-category-param="{{ category.slug }}">
+                                <div class="img-wrap"><i class="fa-solid fa-{{ category.icon }}"></i></div>
+                                <p class="card-name">{{ category.name }}</p>
+                                <p class="card-sub">{{ category.count }} refs</p>
+                            </button>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section class="catalog-results">
+                    <div class="results-info">
+                        <span data-catalog-target="count">{{ products|length }} produits</span>
+                        <div class="inline-actions">
+                            <button type="button" class="view-btn" data-view-btn="grid" data-action="click->catalog#setView" data-catalog-view-param="grid"><i class="fa-solid fa-grip"></i></button>
+                            <button type="button" class="view-btn active" data-view-btn="list" data-action="click->catalog#setView" data-catalog-view-param="list"><i class="fa-solid fa-list"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="product-list" data-catalog-target="listView">
+                        {% for product in products %}
+                            {% include 'partials/_product_list_item.html.twig' with { product: product } %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="product-grid product-grid-catalog" data-catalog-target="gridView" hidden>
+                        {% for product in products %}
+                            {% include 'partials/_product_card.html.twig' with { product: product } %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="summary-box empty-state" data-catalog-target="emptyState" hidden>
+                        <i class="fa-solid fa-wine-bottle"></i>
+                        <h2 class="section-title">Aucun produit ne correspond</h2>
+                        <p class="small-copy">Essayez une autre recherche ou revenez sur la categorie "Tous".</p>
+                        <button type="button" class="btn btn-outline btn-full" data-action="click->catalog#clearSearch">Reinitialiser la recherche</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <div class="sheet" data-catalog-target="sortSheet" data-action="click->catalog#closeSort">
+            <div class="sheet-inner">
+                <div class="sheet-handle"></div>
+                <h2 class="section-title">Trier par</h2>
+                <div class="utility-stack">
+                    <button type="button" class="menu-item active" data-sort-option="featured" data-action="click->catalog#setSort" data-catalog-sort-param="featured"><span class="menu-label">Pertinence</span><i class="fa-solid fa-circle-check"></i></button>
+                    <button type="button" class="menu-item" data-sort-option="price-asc" data-action="click->catalog#setSort" data-catalog-sort-param="price-asc"><span class="menu-label">Prix croissant</span></button>
+                    <button type="button" class="menu-item" data-sort-option="price-desc" data-action="click->catalog#setSort" data-catalog-sort-param="price-desc"><span class="menu-label">Prix decroissant</span></button>
+                    <button type="button" class="menu-item" data-sort-option="rating" data-action="click->catalog#setSort" data-catalog-sort-param="rating"><span class="menu-label">Mieux notes</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

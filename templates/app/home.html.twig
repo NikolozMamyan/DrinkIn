@@ -1,0 +1,98 @@
+{% extends 'layouts/app.html.twig' %}
+
+{% block title %}DrinkIn | Accueil{% endblock %}
+
+{% block app_header %}
+    <header class="header">
+        <div class="header-logo">
+            <i class="fa-solid fa-wine-glass"></i>
+            <span>Drink<em>In</em></span>
+        </div>
+        <div class="header-actions">
+            <a href="{{ path('app_catalogue') }}" class="icon-btn"><i class="fa-solid fa-magnifying-glass"></i></a>
+            <a href="{{ path('app_cart') }}" class="icon-btn">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span class="badge" {{ cart.count > 0 ? '' : 'hidden' }}>{{ cart.count }}</span>
+            </a>
+        </div>
+    </header>
+{% endblock %}
+
+{% block app_body %}
+    <main class="page" data-controller="catalog">
+        <div class="utility-stack">
+            <section>
+                <p class="section-eyebrow">Bonjour</p>
+                <h1 class="t-hero">Que souhaitez-vous boire ?</h1>
+            </section>
+
+            <a href="{{ path('app_catalogue') }}" class="search-bar">
+                <i class="fa-solid fa-magnifying-glass muted"></i>
+                <input type="text" value="" placeholder="Rechercher un vin, whisky, biere..." readonly>
+            </a>
+
+            <a href="{{ path('app_product_show', { slug: heroProduct.slug }) }}" class="hero-banner">
+                <div class="hero-text">
+                    <p class="label">Offre du moment</p>
+                    <h2>{{ heroProduct.name }}<br>{{ heroProduct.badge }}</h2>
+                    <span class="btn btn-primary">Voir l'offre</span>
+                </div>
+                <i class="fa-solid fa-{{ heroProduct.icon }}"></i>
+            </a>
+
+            <section>
+                <div class="section-header">
+                    <h2>Categories</h2>
+                </div>
+                <div class="tabs">
+                    {% for category in categories %}
+                        <button class="tab {{ loop.first ? 'active' : '' }}" type="button">{{ category.name }}</button>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section>
+                <div class="section-header">
+                    <h2>En vedette</h2>
+                    <a href="{{ path('app_catalogue') }}">Voir tout</a>
+                </div>
+                <div class="featured-scroll">
+                    <div class="featured-row">
+                        {% for product in featuredProducts %}
+                            <article class="featured-card">
+                                <a href="{{ path('app_product_show', { slug: product.slug }) }}" class="featured-card-link">
+                                    <div class="f-img">
+                                        <i class="fa-solid fa-{{ product.icon }}"></i>
+                                        {% if product.badge %}<span class="tag">{{ product.badge }}</span>{% endif %}
+                                    </div>
+                                    <div class="f-body">
+                                        <p class="card-name">{{ product.name }}</p>
+                                        <p class="card-sub">{{ product.subtitle }}</p>
+                                    </div>
+                                </a>
+                                <div class="card-footer card-footer-detached">
+                                    <span class="t-price">{{ (product.price / 100)|number_format(2, ',', ' ') }}EUR</span>
+                                    <button class="add-btn" type="button" data-action="click->catalog#addToCart" data-product-id="{{ product.id }}" data-product-name="{{ product.name }}">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div class="section-header">
+                    <h2>Tous les produits</h2>
+                    <a href="{{ path('app_catalogue') }}">Filtrer</a>
+                </div>
+                <div class="product-grid">
+                    {% for product in products %}
+                        {% include 'partials/_product_card.html.twig' with { product: product } %}
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+    </main>
+{% endblock %}

@@ -1,0 +1,22 @@
+<div class="address-card {{ address.isDefault|default(false) ? 'address-card-default' : '' }}">
+    <div class="a-icon"><i class="fa-solid fa-{{ address.icon }}"></i></div>
+    <div class="address-content">
+        <p class="card-name">{{ address.label }}</p>
+        <p class="card-sub">{{ address.address }}</p>
+    </div>
+    <div class="address-actions">
+        {% if address.isDefault|default(false) %}
+            <span class="chip">Principale</span>
+        {% endif %}
+        {% if editable|default(false) %}
+            <button
+                type="button"
+                class="icon-btn icon-btn-sm"
+                data-address="{{ address|json_encode|e('html_attr') }}"
+                data-action="click->profile#openAddressEditor"
+            >
+                <i class="fa-solid fa-pen"></i>
+            </button>
+        {% endif %}
+    </div>
+</div>

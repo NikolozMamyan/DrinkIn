@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block body_class %}app-shell{% endblock %}
+
+{% block body %}
+    <div class="app-frame" {% block app_frame_attributes %}{% endblock %}>
+        {% block app_header %}{% endblock %}
+        {% block app_body %}{% endblock %}
+        <section class="install-popup" data-controller="install" hidden>
+            <button type="button" class="install-popup-close" data-action="click->install#dismiss" aria-label="Fermer la proposition d'installation">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="install-popup-copy">
+                <p class="section-eyebrow">Application</p>
+                <h2 class="section-title">Installer DrinkIn</h2>
+                <p class="small-copy">Ajoutez DrinkIn a votre ecran d'accueil pour un acces plus rapide.</p>
+            </div>
+            <button type="button" class="btn btn-primary install-popup-cta" data-action="click->install#prompt">
+                <i class="fa-solid fa-download"></i>
+                <span>Installer</span>
+            </button>
+        </section>
+        {% include 'partials/_bottom_nav.html.twig' with { current_nav: current_nav|default('home'), cart_count: cart.count|default(0) } %}
+        <div id="toast-root" class="toast toast-hidden" data-controller="toast"></div>
+    </div>
+{% endblock %}

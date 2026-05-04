@@ -1,0 +1,113 @@
+{% extends 'layouts/app.html.twig' %}
+
+{% block title %}DrinkIn | Panier{% endblock %}
+
+{% block app_frame_attributes %}data-controller="cart"{% endblock %}
+
+{% block app_header %}
+    <header class="header">
+        <div class="header-title">
+            <a href="{{ path('app_home') }}" class="icon-btn"><i class="fa-solid fa-arrow-left"></i></a>
+            <div>
+                <div>Mon panier</div>
+                <div class="small-copy" data-cart-target="headerCount">{{ cart.count }} articles</div>
+            </div>
+        </div>
+    </header>
+{% endblock %}
+
+{% block app_body %}
+    <main class="page">
+        <div class="utility-stack">
+            <section class="section-header-tight">
+                <div class="section-header">
+                    <h2>Votre selection</h2>
+                    <button
+                        type="button"
+                        class="link-btn"
+                        data-cart-target="clearButton"
+                        data-action="click->cart#clearCart"
+                        {{ cart.isEmpty ? 'hidden' : '' }}
+                    >
+                        Vider le panier
+                    </button>
+                </div>
+            </section>
+
+            <section data-cart-target="emptyState" {{ cart.isEmpty ? '' : 'hidden' }}>
+                <div class="summary-box empty-state">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <h2 class="section-title">Votre panier est vide</h2>
+                    <p class="small-copy">Ajoutez quelques bouteilles pour commencer votre commande.</p>
+                    <a href="{{ path('app_catalogue') }}" class="btn btn-primary btn-full">Explorer le catalogue</a>
+                </div>
+            </section>
+
+            <div data-cart-target="filledState" {{ cart.isEmpty ? 'hidden' : '' }}>
+            <div class="utility-stack">
+            <section>
+                <div class="section-header"><h2>Mode de livraison</h2></div>
+                <div class="delivery-options">
+                    <button type="button" class="delivery-option {{ cart.delivery == 'express' ? 'is-selected' : '' }}" data-delivery-option data-mode="express" data-action="click->cart#selectDelivery"><i class="fa-solid fa-rocket"></i>Express</button>
+                    <button type="button" class="delivery-option {{ cart.delivery == 'standard' ? 'is-selected' : '' }}" data-delivery-option data-mode="standard" data-action="click->cart#selectDelivery"><i class="fa-solid fa-box"></i>Standard</button>
+                    <button type="button" class="delivery-option {{ cart.delivery == 'pickup' ? 'is-selected' : '' }}" data-delivery-option data-mode="pickup" data-action="click->cart#selectDelivery"><i class="fa-solid fa-store"></i>Retrait</button>
+                </div>
+            </section>
+
+            <section class="card" data-cart-target="itemsContainer">
+                {% for item in cart.items %}
+                    <div class="cart-item" data-cart-item>
+                        <div class="cart-thumb"><i class="fa-solid fa-{{ item.icon }}"></i></div>
+                        <div class="cart-info-fill">
+                            <p class="card-name">{{ item.name }}</p>
+                            <p class="card-sub">{{ item.subtitle }}</p>
+                            <p class="t-price">{{ (item.price / 100)|number_format(2, ',', ' ') }}EUR</p>
+                        </div>
+                        <div class="qty-control">
+                            <button type="button" class="qty-btn" data-product-id="{{ item.id }}" data-delta="-1" data-action="click->cart#updateQuantity">-</button>
+                            <span data-quantity>{{ item.quantity }}</span>
+                            <button type="button" class="qty-btn" data-product-id="{{ item.id }}" data-delta="1" data-action="click->cart#updateQuantity">+</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </section>
+
+            <section>
+                <div class="section-header"><h2>Code promo</h2></div>
+                <div class="promo-bar">
+                    <i class="fa-solid fa-tags"></i>
+                    <input type="text" placeholder="Entrez votre code..." data-promo-input>
+                    <button type="button" class="btn btn-outline" data-action="click->cart#applyPromo">Appliquer</button>
+                </div>
+            </section>
+
+            <section>
+                <div class="section-header"><h2>Recapitulatif</h2></div>
+                <div class="summary-box">
+                    <div class="summary-row"><span>Sous-total</span><span data-cart-target="subtotal">{{ (cart.subtotal / 100)|number_format(2, ',', ' ') }}EUR</span></div>
+                    <div class="summary-row"><span>Livraison</span><span data-cart-target="deliveryFee">{{ (cart.deliveryFee / 100)|number_format(2, ',', ' ') }}EUR</span></div>
+                    <div class="summary-row" data-cart-target="promoRow" {{ cart.promo ? '' : 'hidden' }}>
+                        <span>Code {{ cart.promo ?: 'BIENVENUE10' }}</span>
+                        <span data-cart-target="discount">{{ (cart.discount / 100)|number_format(2, ',', ' ') }}EUR</span>
+                    </div>
+                    <div class="summary-row total"><span>Total</span><span data-cart-target="total">{{ (cart.total / 100)|number_format(2, ',', ' ') }}EUR</span></div>
+                </div>
+            </section>
+
+            <section class="note-box">
+                <p class="small-copy">Note pour la livraison</p>
+                <textarea
+                    placeholder="Digicode, instructions..."
+                    data-cart-target="note"
+                    data-action="input->cart#queueNoteUpdate"
+                >{{ cart.note }}</textarea>
+            </section>
+
+            <a href="{{ path('app_checkout') }}" class="btn btn-primary btn-full" data-cart-target="checkoutLabel">
+                Payer {{ (cart.total / 100)|number_format(2, ',', ' ') }}EUR
+            </a>
+            </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}

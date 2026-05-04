@@ -1,0 +1,27 @@
+<nav class="bottom-nav">
+    <div class="nav-items">
+        <a href="{{ path('app_home') }}" class="nav-item {{ current_nav == 'home' ? 'active' : '' }}">
+            <span class="nav-icon"><i class="fa-solid fa-house"></i></span>
+            <span>Accueil</span>
+        </a>
+        <a href="{{ path('app_catalogue') }}" class="nav-item {{ current_nav == 'catalogue' ? 'active' : '' }}">
+            <span class="nav-icon"><i class="fa-solid fa-wine-glass"></i></span>
+            <span>Catalogue</span>
+        </a>
+        <a href="{{ path('app_cart') }}" class="nav-item {{ current_nav == 'cart' ? 'active' : '' }}">
+            <span class="nav-icon">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span class="badge" {{ cart_count > 0 ? '' : 'hidden' }}>{{ cart_count }}</span>
+            </span>
+            <span>Panier</span>
+        </a>
+        <a href="{{ path('app_orders') }}" class="nav-item {{ current_nav == 'orders' ? 'active' : '' }}">
+            <span class="nav-icon"><i class="fa-solid fa-box"></i></span>
+            <span>Commandes</span>
+        </a>
+        <a href="{{ path('app_profile') }}" class="nav-item {{ current_nav == 'profile' ? 'active' : '' }}">
+            <span class="nav-icon"><i class="fa-solid fa-user"></i></span>
+            <span>Profil</span>
+        </a>
+    </div>
+</nav>

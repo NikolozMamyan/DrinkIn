@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}DrinkIn Admin | Categorie{% endblock %}
+
+{% block body %}
+    <main class="admin-shell">
+        <section class="admin-header">
+            <div>
+                <p class="section-eyebrow">Back-office</p>
+                <h1 class="headline">{{ category.id ? 'Modifier la categorie' : 'Nouvelle categorie' }}</h1>
+            </div>
+            <a href="{{ path('admin_catalog_index') }}" class="btn btn-outline">Retour</a>
+        </section>
+
+        <section class="admin-panel">
+            {{ form_start(form) }}
+                <div class="form-stack">
+                    {{ form_row(form.name) }}
+                    {{ form_row(form.slug) }}
+                    {{ form_row(form.icon) }}
+                    {{ form_row(form.submit, { attr: { class: 'btn btn-primary btn-full' } }) }}
+                </div>
+            {{ form_end(form) }}
+        </section>
+    </main>
+{% endblock %}

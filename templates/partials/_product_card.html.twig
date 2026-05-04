@@ -1,0 +1,34 @@
+<article
+    class="product-card"
+    data-category="{{ product.category }}"
+    data-name="{{ (product.name ~ ' ' ~ product.subtitle)|lower }}"
+    data-slug="{{ product.slug }}"
+    data-price="{{ product.price }}"
+    data-rating="{{ product.rating }}"
+    data-featured="{{ product.featured ? 1 : 0 }}"
+>
+    <a href="{{ path('app_product_show', { slug: product.slug }) }}" class="product-card-link">
+        <div class="img-wrap">
+            <i class="fa-solid fa-{{ product.icon }}"></i>
+            {% if product.badge %}
+                <span class="tag">{{ product.badge }}</span>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <p class="card-name">{{ product.name }}</p>
+            <p class="card-sub">{{ product.subtitle }}</p>
+        </div>
+    </a>
+    <div class="card-footer card-footer-detached">
+        <span class="t-price">{{ (product.price / 100)|number_format(2, ',', ' ') }}EUR</span>
+        <button
+            type="button"
+            class="add-btn"
+            data-action="click->catalog#addToCart"
+            data-product-id="{{ product.id }}"
+            data-product-name="{{ product.name }}"
+        >
+            <i class="fa-solid fa-plus"></i>
+        </button>
+    </div>
+</article>

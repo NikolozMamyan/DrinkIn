@@ -1,0 +1,122 @@
+{% extends 'layouts/app.html.twig' %}
+
+{% block title %}DrinkIn | Paiement{% endblock %}
+
+{% block app_header %}
+    <header class="header">
+        <div class="header-title">
+            <a href="{{ path('app_cart') }}" class="icon-btn"><i class="fa-solid fa-arrow-left"></i></a>
+            <span>Paiement</span>
+        </div>
+        <div class="small-copy"><i class="fa-solid fa-lock"></i> SSL securise</div>
+    </header>
+{% endblock %}
+
+{% block app_body %}
+    <div data-controller="checkout" data-checkout-checkout-url-value="{{ path('api_orders_checkout') }}">
+        <main class="page" data-checkout-target="main">
+            <div class="steps">
+                <div class="step done"><div class="step-dot"><i class="fa-solid fa-check"></i></div><div class="step-label">Panier</div></div>
+                <div class="step done"><div class="step-dot"><i class="fa-solid fa-check"></i></div><div class="step-label">Livraison</div></div>
+                <div class="step active"><div class="step-dot">3</div><div class="step-label">Paiement</div></div>
+            </div>
+
+            <div class="utility-stack">
+                <section class="checkout-panel">
+                    <div class="section-header"><h2>Adresse de livraison</h2></div>
+                    {% for address in profile.addresses %}
+                        {% include 'partials/_address_card.html.twig' with { address: address } %}
+                    {% endfor %}
+                    {% if profile.addresses|length == 0 %}
+                        <div class="address-card">
+                            <div>
+                                <p class="card-name">Aucune adresse enregistree</p>
+                                <p class="card-sub">Ajoutez une adresse dans le profil pour finaliser votre compte.</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </section>
+
+                <section class="checkout-panel">
+                    <div class="section-header"><h2>Moyen de paiement</h2></div>
+                    <div class="pay-methods">
+                        <button type="button" class="pay-method active"><i class="fa-regular fa-credit-card"></i>Carte</button>
+                        <button type="button" class="pay-method"><i class="fa-brands fa-paypal"></i>PayPal</button>
+                        <button type="button" class="pay-method"><i class="fa-brands fa-apple-pay"></i>Apple</button>
+                    </div>
+                </section>
+
+                <section class="card-3d">
+                    <div class="card-inner" data-checkout-target="cardInner">
+                        <div class="card-front stripe-card">
+                            <div class="small-copy">Carte premium</div>
+                            <div class="card-number" data-checkout-target="numberDisplay">•••• •••• •••• ••••</div>
+                            <div class="card-meta">
+                                <div><div class="small-copy">Titulaire</div><div data-checkout-target="nameDisplay">VOTRE NOM</div></div>
+                                <div><div class="small-copy">Expire</div><div data-checkout-target="expiryDisplay">MM/AA</div></div>
+                            </div>
+                        </div>
+                        <div class="card-back">
+                            <div class="card-back-strip"></div>
+                            <div class="card-back-body">
+                                <div class="summary-row"><span>CVV</span><span data-checkout-target="cvvDisplay">•••</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-stack checkout-form">
+                    <input class="form-input" type="text" placeholder="Numero de carte" data-action="input->checkout#formatNumber">
+                    <input class="form-input" type="text" placeholder="Titulaire" data-action="input->checkout#updateName">
+                    <div class="input-row">
+                        <input class="form-input" type="text" placeholder="MM/AA" data-action="input->checkout#formatExpiry">
+                        <input class="form-input" type="text" placeholder="CVV" data-action="focus->checkout#flip blur->checkout#unflip input->checkout#updateCvv">
+                    </div>
+                </section>
+
+                <section class="summary-box checkout-summary">
+                    <div class="summary-row"><span>{{ cart.count }} articles</span><span>{{ (cart.subtotal / 100)|number_format(2, ',', ' ') }}EUR</span></div>
+                    <div class="summary-row"><span>Livraison</span><span>{{ (cart.deliveryFee / 100)|number_format(2, ',', ' ') }}EUR</span></div>
+                    <div class="summary-row total"><span>Total</span><span>{{ (cart.total / 100)|number_format(2, ',', ' ') }}EUR</span></div>
+                </section>
+
+                <button type="button" class="btn btn-primary btn-full checkout-pay-button" data-action="click->checkout#openModal">
+                    <i class="fa-solid fa-lock"></i> Payer {{ (cart.total / 100)|number_format(2, ',', ' ') }}EUR
+                </button>
+            </div>
+        </main>
+
+        <section class="modal-overlay" data-checkout-target="modal">
+            <div class="modal-sheet">
+                <div class="modal-handle"></div>
+                <div data-checkout-target="processing">
+                    <p class="section-title">Verification 3D Secure...</p>
+                </div>
+                <div data-checkout-target="otp" hidden>
+                    <p class="section-title">Confirmez votre paiement</p>
+                    <p class="small-copy">Code envoye au 06 •• •••• •••• 42</p>
+                    <div class="input-row otp-grid">
+                        <input class="form-input" maxlength="1">
+                        <input class="form-input" maxlength="1">
+                        <input class="form-input" maxlength="1">
+                    </div>
+                    <button type="button" class="btn btn-primary btn-full" data-action="click->checkout#confirm">Confirmer</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="page" data-checkout-target="success" hidden>
+            <div class="utility-stack">
+                <div class="summary-box checkout-success-card">
+                    <h2 class="section-title">Commande confirmee</h2>
+                    <p class="small-copy">Numero <span data-checkout-target="successNumber">DRK-00000000</span></p>
+                    <p class="small-copy">Livraison estimee : 30 a 45 min</p>
+                    <div class="divider"></div>
+                    <div class="summary-row"><span>Total paye</span><span>{{ (cart.total / 100)|number_format(2, ',', ' ') }}EUR</span></div>
+                </div>
+                <a href="{{ path('app_orders') }}" class="btn btn-primary btn-full">Suivre ma commande</a>
+                <a href="{{ path('app_home') }}" class="btn btn-outline btn-full">Continuer mes achats</a>
+            </div>
+        </section>
+    </div>
+{% endblock %}

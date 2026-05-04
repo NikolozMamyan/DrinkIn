@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}DrinkIn Admin | Catalogue{% endblock %}
+
+{% block body %}
+    <main class="admin-shell">
+        <section class="admin-header">
+            <div>
+                <p class="section-eyebrow">Back-office</p>
+                <h1 class="headline">Catalogue</h1>
+                <p class="small-copy">Gerez categories et produits depuis une interface unique.</p>
+            </div>
+            <div class="inline-actions">
+                <a href="{{ path('admin_catalog_category_new') }}" class="btn btn-outline">Nouvelle categorie</a>
+                <a href="{{ path('admin_catalog_product_new') }}" class="btn btn-primary">Nouveau produit</a>
+            </div>
+        </section>
+
+        <section class="admin-panel">
+            <div class="section-header">
+                <h2>Categories</h2>
+                <span class="small-copy">{{ categories|length }} elements</span>
+            </div>
+            <div class="admin-table">
+                {% for category in categories %}
+                    <div class="admin-row">
+                        <div class="admin-row-main">
+                            <strong>{{ category.name }}</strong>
+                            <span class="small-copy">{{ category.slug }} · {{ category.icon }} · {{ category.products|length }} produits</span>
+                        </div>
+                        <div class="inline-actions">
+                            <a href="{{ path('admin_catalog_category_edit', { id: category.id }) }}" class="btn btn-outline">Modifier</a>
+                            <form method="post" action="{{ path('admin_catalog_category_delete', { id: category.id }) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete-category-' ~ category.id) }}">
+                                <button type="submit" class="btn btn-outline">Supprimer</button>
+                            </form>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="small-copy">Aucune categorie.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="admin-panel">
+            <div class="section-header">
+                <h2>Produits</h2>
+                <span class="small-copy">{{ products|length }} elements</span>
+            </div>
+            <div class="admin-table">
+                {% for product in products %}
+                    <div class="admin-row">
+                        <div class="admin-row-main">
+                            <strong>{{ product.name }}</strong>
+                            <span class="small-copy">{{ product.category.name }} · {{ (product.priceCents / 100)|number_format(2, ',', ' ') }}EUR · {{ product.slug }}</span>
+                        </div>
+                        <div class="inline-actions">
+                            <a href="{{ path('admin_catalog_product_edit', { id: product.id }) }}" class="btn btn-outline">Modifier</a>
+                            <form method="post" action="{{ path('admin_catalog_product_delete', { id: product.id }) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete-product-' ~ product.id) }}">
+                                <button type="submit" class="btn btn-outline">Supprimer</button>
+                            </form>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="small-copy">Aucun produit.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+{% endblock %}

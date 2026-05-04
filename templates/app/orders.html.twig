@@ -1,0 +1,100 @@
+{% extends 'layouts/app.html.twig' %}
+
+{% block title %}DrinkIn | Commandes{% endblock %}
+
+{% block app_header %}
+    <header class="header">
+        <div class="header-title">
+            <span>Mes commandes</span>
+        </div>
+    </header>
+{% endblock %}
+
+{% block app_body %}
+    <div data-controller="orders">
+        <main class="page">
+            <div class="utility-stack">
+                <section class="summary-box orders-hero">
+                    <p class="section-eyebrow">Suivi en direct</p>
+                    <h1 class="headline">Vos commandes en un coup d'oeil.</h1>
+                    <p class="small-copy">Retrouvez les livraisons en cours, l'historique recent et la notation apres reception.</p>
+                </section>
+
+                <div class="filter-tabs order-filter-tabs">
+                    <button class="tab active" type="button" data-orders-target="filterTab" data-filter="all" data-action="click->orders#setFilter" data-orders-filter-param="all">Toutes</button>
+                    <button class="tab" type="button" data-orders-target="filterTab" data-filter="pending" data-action="click->orders#setFilter" data-orders-filter-param="pending">En cours</button>
+                    <button class="tab" type="button" data-orders-target="filterTab" data-filter="delivered" data-action="click->orders#setFilter" data-orders-filter-param="delivered">Livrees</button>
+                    <button class="tab" type="button" data-orders-target="filterTab" data-filter="cancelled" data-action="click->orders#setFilter" data-orders-filter-param="cancelled">Annulees</button>
+                </div>
+
+                {% if currentOrder %}
+                    <section class="summary-box orders-current-card" data-orders-target="card" data-status="{{ currentOrder.status }}" data-action="click->orders#open" data-orders-number-param="{{ currentOrder.number }}">
+                        <p class="section-eyebrow">En cours de livraison</p>
+                        <div class="row-between">
+                            <div>
+                                <p class="card-name">#{{ currentOrder.number }}</p>
+                                <p class="card-sub">{{ currentOrder.itemsLabel }}</p>
+                            </div>
+                            <span class="status-pill {{ currentOrder.status }}">{{ currentOrder.statusLabel }}</span>
+                        </div>
+                    </section>
+
+                    <section class="orders-list">
+                        {% for order in orders|slice(1) %}
+                            <button type="button" class="order-card" data-orders-target="card" data-status="{{ order.status }}" data-action="click->orders#open" data-orders-number-param="{{ order.number }}">
+                                <div class="order-icon"><i class="fa-solid fa-{{ order.icon }}"></i></div>
+                                <div class="order-info-fill-left">
+                                    <p class="order-id">#{{ order.number }}</p>
+                                    <p class="order-items">{{ order.itemsLabel }}</p>
+                                    <p class="order-date">{{ order.dateLabel }}</p>
+                                </div>
+                                <span class="status-pill {{ order.status }}">{{ order.statusLabel }}</span>
+                            </button>
+                        {% endfor %}
+                    </section>
+                {% else %}
+                    <section class="summary-box empty-state">
+                        <i class="fa-solid fa-box-open"></i>
+                        <h2 class="section-title">Aucune commande pour le moment</h2>
+                        <p class="small-copy">Passez votre premiere commande pour suivre vos livraisons ici.</p>
+                    </section>
+                {% endif %}
+            </div>
+        </main>
+
+        {% if currentOrder %}
+            <section class="sheet" data-orders-target="sheet" data-action="click->orders#close">
+                <div class="sheet-inner">
+                    <div class="sheet-handle"></div>
+                    <div class="row-between">
+                        <div>
+                            <p class="section-eyebrow" data-orders-target="sheetOrderNumber">#{{ currentOrder.number }}</p>
+                            <h2 class="section-title">Detail de commande</h2>
+                            <p class="card-sub" data-orders-target="sheetItems">{{ currentOrder.itemsLabel }}</p>
+                        </div>
+                        <span class="status-pill {{ currentOrder.status }}" data-orders-target="sheetStatus">{{ currentOrder.statusLabel }}</span>
+                    </div>
+
+                    <div class="timeline timeline-block" data-orders-target="timeline">
+                        {% for step in timeline %}
+                            <div class="timeline-item {{ step.done ? 'done' : '' }} {{ step.active ? 'active' : '' }}">
+                                <div class="timeline-dot"><i class="fa-solid fa-{{ step.icon }}"></i></div>
+                                <div>
+                                    <p class="card-name">{{ step.label }}</p>
+                                    <p class="card-sub">{{ step.time }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <p class="section-eyebrow">Notez votre commande</p>
+                    <div class="rating-stars">
+                        {% for rating in 1..5 %}
+                            <button type="button" data-orders-target="star" data-action="click->orders#rate" data-orders-rating-param="{{ rating }}"><i class="fa-regular fa-star"></i></button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+    </div>
+{% endblock %}

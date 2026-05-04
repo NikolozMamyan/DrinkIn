@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}DrinkIn | Connexion{% endblock %}
+
+{% block body %}
+    <main class="auth-shell">
+        <section class="auth-card">
+            <p class="section-eyebrow">Connexion securisee</p>
+            <h1 class="headline">Accedez a votre cave mobile</h1>
+
+            {% if error %}
+                <div class="flash flash-error">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+            {% endif %}
+
+            <form method="post">
+                <input type="email" name="_username" value="{{ last_username }}" class="form-input" placeholder="Email" autocomplete="email" required>
+                <input type="password" name="_password" class="form-input" placeholder="Mot de passe" autocomplete="current-password" required>
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                <button class="btn btn-primary btn-full" type="submit">Se connecter</button>
+            </form>
+
+            <p class="small-copy">Pas encore de compte ? <a class="link-accent" href="{{ path('app_register') }}">Inscription</a></p>
+        </section>
+    </main>
+{% endblock %}

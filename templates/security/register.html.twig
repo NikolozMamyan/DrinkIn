@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}DrinkIn | Inscription{% endblock %}
+
+{% block body %}
+    <main class="auth-shell">
+        <section class="auth-card">
+            <p class="section-eyebrow">Nouveau compte</p>
+            <h1 class="headline">Creez votre acces DrinkIn</h1>
+            {{ form_start(registrationForm) }}
+                {{ form_row(registrationForm.firstName, { row_attr: { class: 'form-stack' }, attr: { class: 'form-input' } }) }}
+                {{ form_row(registrationForm.lastName, { row_attr: { class: 'form-stack' }, attr: { class: 'form-input' } }) }}
+                {{ form_row(registrationForm.email, { row_attr: { class: 'form-stack' }, attr: { class: 'form-input' } }) }}
+                {{ form_row(registrationForm.phone, { row_attr: { class: 'form-stack' }, attr: { class: 'form-input' } }) }}
+                {{ form_row(registrationForm.plainPassword.first, { row_attr: { class: 'form-stack' }, attr: { class: 'form-input' } }) }}
+                {{ form_row(registrationForm.plainPassword.second, { row_attr: { class: 'form-stack' }, attr: { class: 'form-input' } }) }}
+                {{ form_row(registrationForm.submit, { attr: { class: 'btn btn-primary btn-full' } }) }}
+            {{ form_end(registrationForm) }}
+            <p class="small-copy">Deja inscrit ? <a class="link-accent" href="{{ path('app_login') }}">Connexion</a></p>
+        </section>
+    </main>
+{% endblock %}

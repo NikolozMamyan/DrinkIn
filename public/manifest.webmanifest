@@ -1,0 +1,28 @@
+{
+    "name": "DrinkIn",
+    "short_name": "DrinkIn",
+    "description": "Catalogue premium, panier rapide et commandes fluides pour vos boissons favorites.",
+    "lang": "fr",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#0d0d1a",
+    "theme_color": "#0d0d1a",
+    "prefer_related_applications": false,
+    "categories": ["food", "shopping", "lifestyle"],
+    "icons": [
+        {
+            "src": "/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

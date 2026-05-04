@@ -1,0 +1,30 @@
+<article
+    class="product-list-item"
+    data-category="{{ product.category }}"
+    data-name="{{ (product.name ~ ' ' ~ product.subtitle)|lower }}"
+    data-slug="{{ product.slug }}"
+    data-price="{{ product.price }}"
+    data-rating="{{ product.rating }}"
+    data-featured="{{ product.featured ? 1 : 0 }}"
+>
+    <a href="{{ path('app_product_show', { slug: product.slug }) }}" class="product-list-link">
+        <div class="li-img"><i class="fa-solid fa-{{ product.icon }}"></i></div>
+        <div class="li-info">
+            <p class="li-name">{{ product.name }}</p>
+            <p class="li-sub">{{ product.subtitle }} - {{ product.abv }}</p>
+            <div class="li-footer">
+                <span class="li-price">{{ (product.price / 100)|number_format(2, ',', ' ') }}EUR</span>
+                <span class="li-rating"><i class="fa-solid fa-star"></i> {{ product.rating }}</span>
+            </div>
+        </div>
+    </a>
+    <button
+        type="button"
+        class="li-add"
+        data-action="click->catalog#addToCart"
+        data-product-id="{{ product.id }}"
+        data-product-name="{{ product.name }}"
+    >
+        Ajouter
+    </button>
+</article>

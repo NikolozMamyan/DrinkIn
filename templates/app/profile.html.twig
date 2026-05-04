@@ -1,0 +1,132 @@
+{% extends 'layouts/app.html.twig' %}
+
+{% block title %}DrinkIn | Profil{% endblock %}
+
+{% block app_frame_attributes %}data-controller="profile"{% endblock %}
+
+{% block app_header %}
+    <header class="header">
+        <div class="header-title"><span>Mon profil</span></div>
+        <button type="button" class="icon-btn" data-action="click->profile#openProfileModal"><i class="fa-solid fa-pen"></i></button>
+    </header>
+{% endblock %}
+
+{% block app_body %}
+    <main class="page">
+        <div class="profile-hero">
+            <div class="avatar">{{ profile.initial }}</div>
+            <h1 class="headline">{{ profile.fullName }}</h1>
+            <p class="muted">{{ profile.email }} - {{ profile.phone }}</p>
+            <span class="membership-pill"><i class="fa-solid fa-crown"></i>{{ profile.memberLevel }}</span>
+        </div>
+
+        <div class="stats-grid">
+            {% for stat in profile.stats %}
+                <div class="profile-metric">
+                    <div class="metric-value">{{ stat.value }}</div>
+                    <div class="small-copy">{{ stat.label }}</div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="utility-stack">
+            <section class="loyalty-card">
+                <p class="section-eyebrow">Programme fidelite DrinkIn+</p>
+                <p class="loyalty-points">{{ profile.points }} points</p>
+                <div class="loyalty-bar"><div class="loyalty-bar-fill"></div></div>
+            </section>
+
+            <section class="menu-section">
+                <div class="section-header">
+                    <h2>Mes adresses</h2>
+                    <button type="button" class="link-btn" data-action="click->profile#openCreateAddressModal">Ajouter</button>
+                </div>
+                <div class="utility-stack" data-profile-target="addresses">
+                    {% for address in profile.addresses %}
+                        {% include 'partials/_address_card.html.twig' with { address: address, editable: true } %}
+                    {% else %}
+                        <div class="summary-box empty-state empty-state-compact">
+                            <p class="card-name">Aucune adresse enregistree</p>
+                            <p class="small-copy">Ajoutez une adresse de livraison pour finaliser vos prochaines commandes.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="menu-section">
+                <div class="section-header"><h2>Parametres</h2></div>
+                <div class="menu-item">
+                    <div class="m-icon"><i class="fa-solid fa-bell"></i></div>
+                    <span class="menu-label menu-label-fill">Notifications push</span>
+                    <button type="button" class="toggle-switch {{ profile.preferences.notificationsEnabled ? 'is-on' : '' }}" data-key="notificationsEnabled" data-action="click->profile#toggle" aria-pressed="{{ profile.preferences.notificationsEnabled ? 'true' : 'false' }}"></button>
+                </div>
+                <div class="menu-item">
+                    <div class="m-icon"><i class="fa-solid fa-location-dot"></i></div>
+                    <span class="menu-label menu-label-fill">Localisation</span>
+                    <button type="button" class="toggle-switch {{ profile.preferences.locationEnabled ? 'is-on' : '' }}" data-key="locationEnabled" data-action="click->profile#toggle" aria-pressed="{{ profile.preferences.locationEnabled ? 'true' : 'false' }}"></button>
+                </div>
+                <div class="menu-item">
+                    <div class="m-icon"><i class="fa-solid fa-moon"></i></div>
+                    <span class="menu-label menu-label-fill">Mode sombre</span>
+                    <button type="button" class="toggle-switch {{ profile.preferences.darkModeEnabled ? 'is-on' : '' }}" data-key="darkModeEnabled" data-action="click->profile#toggle" aria-pressed="{{ profile.preferences.darkModeEnabled ? 'true' : 'false' }}"></button>
+                </div>
+            </section>
+
+            <a href="{{ path('app_logout') }}" class="btn btn-outline btn-full">Se deconnecter</a>
+        </div>
+
+        <section class="sheet" data-profile-target="profileModal" data-action="click->profile#closeProfileModal">
+            <div class="sheet-inner">
+                <div class="sheet-handle"></div>
+                <h2 class="section-title">Modifier le profil</h2>
+                <form class="form-stack profile-modal-form" data-action="submit->profile#submitProfile">
+                    <div class="input-row">
+                        <input class="form-input" name="firstName" value="{{ profile.firstName }}" placeholder="Prenom" data-profile-target="firstName">
+                        <input class="form-input" name="lastName" value="{{ profile.lastName }}" placeholder="Nom" data-profile-target="lastName">
+                    </div>
+                    <input class="form-input" type="email" name="email" value="{{ profile.email }}" placeholder="Email" data-profile-target="email">
+                    <input class="form-input" name="phone" value="{{ profile.phone }}" placeholder="Telephone" data-profile-target="phone">
+                    <button type="submit" class="btn btn-primary btn-full">Enregistrer</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="sheet" data-profile-target="addressModal" data-action="click->profile#closeAddressModal">
+            <div class="sheet-inner">
+                <div class="sheet-handle"></div>
+                <div class="section-header">
+                    <h2 class="section-title" data-profile-target="addressModalTitle">Ajouter une adresse</h2>
+                    <button type="button" class="icon-btn icon-btn-sm" data-action="click->profile#closeAddressModal">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <form class="form-stack profile-modal-form" data-action="submit->profile#submitAddress">
+                    <input type="hidden" data-profile-target="addressId">
+                    <input class="form-input" name="label" placeholder="Libelle" data-profile-target="addressLabel">
+                    <input class="form-input" name="street" placeholder="Adresse" data-profile-target="addressStreet">
+                    <div class="input-row">
+                        <input class="form-input" name="postalCode" placeholder="Code postal" data-profile-target="addressPostalCode">
+                        <input class="form-input" name="city" placeholder="Ville" data-profile-target="addressCity">
+                    </div>
+                    <div class="input-row">
+                        <input class="form-input" name="countryCode" placeholder="Pays" value="FR" data-profile-target="addressCountryCode">
+                        <select class="form-input" name="icon" data-profile-target="addressIcon">
+                            <option value="house">Maison</option>
+                            <option value="briefcase">Bureau</option>
+                            <option value="store">Boutique</option>
+                            <option value="location-dot">Autre</option>
+                        </select>
+                    </div>
+                    <label class="checkbox-row">
+                        <input type="checkbox" data-profile-target="addressDefault">
+                        <span>Definir comme adresse principale</span>
+                    </label>
+                    <div class="profile-modal-actions">
+                        <button type="submit" class="btn btn-primary btn-full">Enregistrer</button>
+                        <button type="button" class="btn btn-outline btn-full" data-profile-target="deleteAddressButton" data-action="click->profile#deleteAddress" hidden>Supprimer</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+{% endblock %}

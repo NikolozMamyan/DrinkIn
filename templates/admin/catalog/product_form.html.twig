@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}DrinkIn Admin | Produit{% endblock %}
+
+{% block body %}
+    <main class="admin-shell">
+        <section class="admin-header">
+            <div>
+                <p class="section-eyebrow">Back-office</p>
+                <h1 class="headline">{{ product.id ? 'Modifier le produit' : 'Nouveau produit' }}</h1>
+            </div>
+            <a href="{{ path('admin_catalog_index') }}" class="btn btn-outline">Retour</a>
+        </section>
+
+        <section class="admin-panel">
+            {{ form_start(form) }}
+                <div class="form-stack">
+                    {{ form_row(form.name) }}
+                    {{ form_row(form.slug) }}
+                    {{ form_row(form.subtitle) }}
+                    {{ form_row(form.typeLabel) }}
+                    {{ form_row(form.category) }}
+                    <div class="input-row">
+                        {{ form_row(form.region) }}
+                        {{ form_row(form.country) }}
+                    </div>
+                    <div class="input-row">
+                        {{ form_row(form.vintage) }}
+                        {{ form_row(form.volumeCl) }}
+                    </div>
+                    <div class="input-row">
+                        {{ form_row(form.alcoholVolume) }}
+                        {{ form_row(form.icon) }}
+                    </div>
+                    {{ form_row(form.description) }}
+                    <div class="input-row">
+                        {{ form_row(form.priceEuros) }}
+                        {{ form_row(form.comparePriceEuros) }}
+                    </div>
+                    <div class="input-row">
+                        {{ form_row(form.ratingAverage) }}
+                        {{ form_row(form.ratingCount) }}
+                    </div>
+                    <div class="input-row">
+                        {{ form_row(form.badgeLabel) }}
+                        {{ form_row(form.featured) }}
+                    </div>
+                    <div class="input-row">
+                        {{ form_row(form.fruit) }}
+                        {{ form_row(form.wood) }}
+                    </div>
+                    {{ form_row(form.peat) }}
+                    {{ form_row(form.submit, { attr: { class: 'btn btn-primary btn-full' } }) }}
+                </div>
+            {{ form_end(form) }}
+        </section>
+    </main>
+{% endblock %}
